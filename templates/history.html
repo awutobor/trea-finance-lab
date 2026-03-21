@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易历史 - Trea Finance Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        
+        /* 主要内容 */
+        .main-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-title h1 {
+            font-size: 2.5em;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .page-title p {
+            color: #64748b;
+            font-size: 1.1em;
+        }
+        
+        /* 资产概览 */
+        .asset-overview {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .asset-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .asset-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        }
+        
+        .asset-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 8px;
+        }
+        
+        .asset-label {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+        
+        .asset-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .reset-btn {
+            padding: 6px 12px;
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-btn:hover {
+            background: #f1f5f9;
+            color: #64748b;
+            border-color: #94a3b8;
+        }
+        
+        /* 当前持仓 */
+        .holdings-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .holdings-section h2 {
+            font-size: 1.5em;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        
+        .holdings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .holding-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .holding-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.15);
+            border-color: #6366f1;
+        }
+        
+        .holding-symbol {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .holding-name {
+            font-size: 0.9em;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .holding-price {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .holding-change {
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .holding-change.positive {
+            color: #10b981;
+        }
+        
+        .holding-change.negative {
+            color: #ef4444;
+        }
+        
+        /* 交易历史 */
+        .history-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .history-header h2 {
+            font-size: 1.5em;
+            color: #1e293b;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        
+        .filter-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .filter-btn.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        
+        /* 交易表格 */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .history-table th,
+        .history-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .history-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .history-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .trade-type {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .trade-type.buy {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+        
+        .trade-type.sell {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+        
+        .profit-positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .profit-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+            }
+            
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+            
+            .main-container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+            
+            .page-title h1 {
+                font-size: 2em;
+            }
+            
+            .asset-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .history-table {
+                font-size: 0.9em;
+            }
+            
+            .history-table th,
+            .history-table td {
+                padding: 8px 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .asset-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .history-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .filter-buttons {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">🚀 Trea Finance Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">首页</a></li>
+            <li><a href="/history" class="active">交易历史</a></li>
+            <li><a href="/#trade">股票行情</a></li>
+            <li><a href="#">学习中心</a></li>
+            <li><a href="#">常见问题</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 主要内容 -->
+    <div class="main-container">
+        <div class="page-title">
+            <h1>交易历史</h1>
+            <p>查看您的所有交易记录，追踪投资表现</p>
+        </div>
+        
+        <!-- 资产概览 -->
+        <div class="asset-overview">
+            <h2>资产概览</h2>
+            <div class="asset-grid">
+                <div class="asset-item">
+                    <div class="asset-value">¥{{ "%.2f"|format(portfolio.total_assets) }}</div>
+                    <div class="asset-label">总资产</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-value">¥{{ "%.2f"|format(portfolio.cash) }}</div>
+                    <div class="asset-label">可用现金</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-value">¥{{ "%.2f"|format(portfolio.stock_value) }}</div>
+                    <div class="asset-label">股票市值</div>
+                </div>
+                <div class="asset-item">
+                    <div class="asset-value" style="color: {% if portfolio.daily_profit_loss >= 0 %}#10b981{% else %}#ef4444{% endif %}">
+                        {% if portfolio.daily_profit_loss >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.daily_profit_loss) }}
+                    </div>
+                    <div class="asset-label">今日盈亏 ({% if portfolio.daily_profit_loss >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.daily_profit_loss_pct) }}%)</div>
+                </div>
+            </div>
+            <div class="asset-footer">
+                <button class="reset-btn" onclick="resetAccount()">重置账户</button>
+            </div>
+        </div>
+        
+        <!-- 当前持仓 -->
+        {% if portfolio.holdings %}
+        <div class="holdings-section">
+            <h2>当前持仓</h2>
+            <div class="holdings-grid">
+                {% for holding in portfolio.holdings %}
+                <div class="holding-card" onclick="window.location.href='/stock/{{ holding.symbol }}'" style="cursor: pointer;">
+                    <div class="holding-symbol">{{ holding.symbol }}</div>
+                    <div class="holding-name">{{ holding.quantity }} 股</div>
+                    <div class="holding-price">¥{{ "%.2f"|format(holding.current_price) }}</div>
+                    <div class="holding-change {% if holding.profit_loss >= 0 %}positive{% else %}negative{% endif %}">
+                        {% if holding.profit_loss >= 0 %}+{% endif %}{{ "%.2f"|format(holding.profit_loss) }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- 交易历史 -->
+        <div class="history-section">
+            <div class="history-header">
+                <h2>交易记录</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">全部</button>
+                    <button class="filter-btn" data-filter="buy">买入</button>
+                    <button class="filter-btn" data-filter="sell">卖出</button>
+                </div>
+            </div>
+            
+            <div id="history-container">
+                <div class="loading">加载交易记录中...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 加载交易历史
+        async function loadHistory() {
+            const container = document.getElementById('history-container');
+            
+            try {
+                const response = await fetch('/api/history?limit=50');
+                const transactions = await response.json();
+                
+                if (transactions.length === 0) {
+                    container.innerHTML = '<div class="loading">暂无交易记录</div>';
+                    return;
+                }
+                
+                const tableHTML = `
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>类型</th>
+                                <th>股票</th>
+                                <th>数量</th>
+                                <th>价格</th>
+                                <th>手续费</th>
+                                <th>金额</th>
+                                <th>盈亏</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${transactions.map(transaction => `
+                                <tr>
+                                    <td>${new Date(transaction.timestamp).toLocaleString()}</td>
+                                    <td><span class="trade-type ${transaction.type.toLowerCase()}">${transaction.type}</span></td>
+                                    <td>${transaction.symbol}</td>
+                                    <td>${transaction.quantity}</td>
+                                    <td>¥${transaction.price.toFixed(2)}</td>
+                                    <td>¥${transaction.fee.toFixed(2)}</td>
+                                    <td>¥${transaction.total_amount.toFixed(2)}</td>
+                                    <td>${transaction.profit_loss ? 
+                                        `<span class="${transaction.profit_loss >= 0 ? 'profit-positive' : 'profit-negative'}">
+                                            ¥${transaction.profit_loss.toFixed(2)}
+                                        </span>` : 
+                                        '-'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                container.innerHTML = tableHTML;
+            } catch (error) {
+                console.error('加载交易历史失败:', error);
+                container.innerHTML = '<div class="loading">加载失败，请刷新页面重试</div>';
+            }
+        }
+        
+        // 筛选功能
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 更新按钮状态
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const filter = this.dataset.filter;
+                    const rows = document.querySelectorAll('.history-table tbody tr');
+                    
+                    rows.forEach(row => {
+                        const tradeType = row.querySelector('.trade-type').textContent;
+                        if (filter === 'all' || tradeType.toLowerCase() === filter) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        }
+        
+        // 重置账户
+        async function resetAccount() {
+            if (!confirm('⚠️ 确定要重置账户吗？\n\n此操作将：\n• 清除所有交易记录\n• 清空所有持仓\n• 将现金重置为10万元\n\n此操作不可恢复！')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/reset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('账户已重置', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage('重置失败，请稍后重试', 'error');
+                }
+            } catch (error) {
+                showMessage('重置失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+            setupFilters();
+        });
+    </script>
+</body>
+</html>

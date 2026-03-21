@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ stock_info.name }} - Trea Finance Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 15px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+        }
+        
+        /* 主要内容 */
+        .main-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        /* 股票头部信息 */
+        .stock-header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stock-info-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .stock-basic-info {
+            flex: 1;
+        }
+        
+        .stock-name {
+            font-size: 2em;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .stock-symbol {
+            font-size: 1.2em;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+        
+        .stock-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #64748b;
+            font-size: 0.9em;
+        }
+        
+        .stock-price-info {
+            text-align: right;
+        }
+        
+        .current-price {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .price-change {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        .price-change.positive {
+            color: #10b981;
+            background: #ecfdf5;
+            border: 1px solid #d1fae5;
+        }
+        
+        .price-change.negative {
+            color: #ef4444;
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+        }
+        
+        .trade-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .btn-primary {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* 股票详情内容 */
+        .stock-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        /* 财务信息 */
+        .financial-info {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .financial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .financial-item {
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .financial-label {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .financial-value {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        /* 交易表单 */
+        .trade-form {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #475569;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .quantity-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .quantity-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        
+        .quantity-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-buy {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-sell {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-buy:hover,
+        .btn-sell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+            }
+            
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+            
+            .main-container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+            
+            .stock-header {
+                padding: 20px;
+            }
+            
+            .stock-info-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .stock-price-info {
+                text-align: left;
+                width: 100%;
+            }
+            
+            .trade-buttons {
+                justify-content: flex-start;
+                width: 100%;
+            }
+            
+            .stock-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .financial-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .stock-name {
+                font-size: 1.5em;
+            }
+            
+            .current-price {
+                font-size: 2em;
+            }
+            
+            .financial-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 消息提示 */
+        .message {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .message.success {
+            background: #10b981;
+        }
+        
+        .message.error {
+            background: #ef4444;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">🚀 Trea Finance Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">首页</a></li>
+            <li><a href="/history">交易历史</a></li>
+            <li><a href="/#trade">股票行情</a></li>
+            <li><a href="#">学习中心</a></li>
+            <li><a href="#">常见问题</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 主要内容 -->
+    <div class="main-container">
+        <!-- 股票头部信息 -->
+        <div class="stock-header">
+            <div class="stock-info-top">
+                <div class="stock-basic-info">
+                    <div class="stock-name">{{ stock_info.name }}</div>
+                    <div class="stock-symbol">{{ stock_info.symbol }}</div>
+                    <div class="stock-meta">
+                        <div class="meta-item">
+                            <span>🏢</span>
+                            <span>{{ stock_info.sector }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📋</span>
+                            <span>{{ stock_info.industry }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stock-price-info">
+                    <div class="current-price">¥{{ "%.2f"|format(price_change.current_price) }}</div>
+                    <div class="price-change {% if price_change.change >= 0 %}positive{% else %}negative{% endif %}">
+                        {% if price_change.change >= 0 %}+{% endif %}{{ "%.2f"|format(price_change.change_percent) }}% 
+                        ({% if price_change.change >= 0 %}+{% endif %}¥{{ "%.2f"|format(price_change.change) }})
+                    </div>
+                    <div class="trade-buttons">
+                        <button class="btn-primary" onclick="document.getElementById('trade-form').scrollIntoView({behavior: 'smooth'})">&gt; 立即交易</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 股票详情内容 -->
+        <div class="stock-content">
+            <!-- 财务信息 -->
+            <div class="financial-info">
+                <h2 class="section-title">公司信息</h2>
+                <div class="financial-grid">
+                    <div class="financial-item">
+                        <div class="financial-label">市值</div>
+                        <div class="financial-value">{{ stock_info.market_cap or 'N/A' }}</div>
+                    </div>
+                    <div class="financial-item">
+                        <div class="financial-label">市盈率</div>
+                        <div class="financial-value">{{ stock_info.pe_ratio or 'N/A' }}</div>
+                    </div>
+                    <div class="financial-item">
+                        <div class="financial-label">52周最高</div>
+                        <div class="financial-value">¥{{ stock_info['52_week_high'] or 'N/A' }}</div>
+                    </div>
+                    <div class="financial-item">
+                        <div class="financial-label">52周最低</div>
+                        <div class="financial-value">¥{{ stock_info['52_week_low'] or 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 交易表单 -->
+            <div class="trade-form" id="trade-form">
+                <h2 class="section-title">快速交易</h2>
+                <div class="form-group">
+                    <label for="stock-symbol">股票代码</label>
+                    <input type="text" id="stock-symbol" value="{{ stock_info.symbol }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="stock-price">当前价格</label>
+                    <input type="text" id="stock-price" value="¥{{ "%.2f"|format(price_change.current_price) }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="stock-quantity">数量</label>
+                    <input type="number" id="stock-quantity" min="1" placeholder="请输入数量">
+                    <div class="quantity-buttons">
+                        <button class="quantity-btn" onclick="document.getElementById('stock-quantity').value = 1">1股</button>
+                        <button class="quantity-btn" onclick="document.getElementById('stock-quantity').value = 10">10股</button>
+                        <button class="quantity-btn" onclick="document.getElementById('stock-quantity').value = 100">100股</button>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-buy" onclick="executeTrade('buy')">买入</button>
+                    <button class="btn-sell" onclick="executeTrade('sell')">卖出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 显示消息
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+        
+        // 执行交易
+        async function executeTrade(type) {
+            const symbol = document.getElementById('stock-symbol').value;
+            const quantity = parseInt(document.getElementById('stock-quantity').value);
+            const currentPrice = parseFloat(document.getElementById('stock-price').textContent.replace('¥', ''));
+            
+            if (!quantity || quantity <= 0) {
+                showMessage('请输入有效的数量', 'error');
+                return;
+            }
+            
+            const action = type === 'buy' ? '买入' : '卖出';
+            if (!confirm(`确认${action} ${quantity} 股 ${symbol}？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ symbol, quantity })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('交易失败，请稍后重试', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trea Finance Lab - 股票投资，第一次就上手</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 0 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            padding: 8px 0;
+            position: relative;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #6366f1;
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 2px;
+        }
+        
+        /* 英雄区 */
+        .hero {
+            padding: 140px 50px 80px;
+            text-align: center;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: #4338ca;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        
+        .hero h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.3;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.4em;
+            color: #64748b;
+            margin-bottom: 40px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+            padding: 18px 45px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-secondary {
+            padding: 18px 45px;
+            background: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8fafc;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+        
+        /* 核心引导区 */
+        .guide-section {
+            padding: 80px 50px;
+            background: white;
+        }
+        
+        .guide-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        
+        .guide-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .guide-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        
+        .guide-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.12);
+            border-color: #6366f1;
+        }
+        
+        .guide-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+        }
+        
+        .guide-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .guide-card p {
+            color: #64748b;
+            line-height: 1.7;
+            font-size: 1.05em;
+            margin-bottom: 20px;
+        }
+        
+        .guide-card .arrow {
+            color: #6366f1;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        /* 新手指引模块 */
+        .tutorial-section {
+            padding: 80px 50px;
+            background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 100%);
+        }
+        
+        .tutorial-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .tutorial-title {
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 50px;
+            color: #1e293b;
+        }
+        
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .step-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.12);
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+        
+        .step-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .step-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        
+        /* 动态帮助元素 */
+        .help-section {
+            padding: 60px 50px;
+            background: white;
+        }
+        
+        .help-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .help-card {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .help-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .help-card h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #4338ca;
+        }
+        
+        .help-card p {
+            color: #3730a3;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            color: #6366f1;
+            font-weight: 600;
+            border-bottom: 2px dashed #6366f1;
+        }
+        
+        .tooltip-content {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            z-index: 100;
+            margin-bottom: 10px;
+        }
+        
+        .tooltip:hover .tooltip-content {
+            display: block;
+        }
+        
+        /* 底部功能区 */
+        .footer-section {
+            padding: 60px 50px;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .footer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.12);
+        }
+        
+        .footer-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .footer-card h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+        
+        .footer-card p {
+            color: #64748b;
+            font-size: 0.95em;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            color: #64748b;
+        }
+        
+        /* 消息提示 */
+        .message {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .message.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .message.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                gap: 20px;
+            }
+            
+            .hero {
+                padding: 120px 20px 60px;
+            }
+            
+            .hero h1 {
+                font-size: 2.2em;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.1em;
+            }
+            
+            .guide-section,
+            .tutorial-section,
+            .help-section,
+            .footer-section {
+                padding: 60px 20px;
+            }
+        }
+        
+        /* 快速交易表单 */
+        .quick-trade-form {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .quick-trade-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .quick-trade-form input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .quick-trade-form .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .quick-trade-form button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-trade-form .btn-buy {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .quick-trade-form .btn-sell {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .quick-trade-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 热门股票选择器 */
+        .popular-stocks {
+            margin-bottom: 12px;
+        }
+        
+        .popular-stocks-label {
+            font-size: 0.85em;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .popular-stocks-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .popular-stock-btn {
+            padding: 6px 12px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #475569;
+        }
+        
+        .popular-stock-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        .popular-stock-btn.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        
+        /* 搜索结果 */
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-symbol {
+            font-weight: 600;
+            color: #6366f1;
+            margin-right: 8px;
+        }
+        
+        .search-result-name {
+            color: #1e293b;
+            margin-right: 12px;
+        }
+        
+        .search-result-sector {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-right: 8px;
+        }
+        
+        .search-result-price {
+            color: #10b981;
+            font-weight: 600;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">🚀 Trea Finance Lab</div>
+        <ul class="nav-links">
+                <li><a href="/" class="active">首页</a></li>
+                <li><a href="/history">交易历史</a></li>
+                <li><a href="#trade">股票行情</a></li>
+                <li><a href="#learn">学习中心</a></li>
+                <li><a href="#faq">常见问题</a></li>
+            </ul>
+    </nav>
+    
+    <!-- 英雄区 -->
+    <section class="hero">
+        <div class="hero-badge">🔰 新手友好</div>
+        <h1>股票投资，第一次就上手</h1>
+        <p class="subtitle">给你 10 万虚拟资金，在真实行情中零风险练习买卖股票</p>
+        <div class="hero-buttons">
+            <a href="#trade" class="btn-primary">马上试试（免费）</a>
+            <a href="#examples" class="btn-secondary">看看别人怎么玩 →</a>
+        </div>
+    </section>
+    
+    <!-- 核心引导区 -->
+    <section class="guide-section" id="trade">
+        <div class="guide-grid">
+            <div class="guide-card" onclick="showGuide('beginner')">
+                <div class="guide-icon">🤔</div>
+                <h3>我不懂股票</h3>
+                <p>完全没接触过股票？没关系，我们从最基础的概念开始，让你3分钟了解什么是股票、如何买卖。</p>
+                <div class="arrow">3分钟了解基础知识 →</div>
+            </div>
+            
+            <div class="guide-card" onclick="quickTrade('AAPL', 1)">
+                <div class="guide-icon">💰</div>
+                <h3>我想试试手</h3>
+                <p>直接体验交易！我们帮你预填了示例交易，点击就能买入1股苹果股票，感受真实交易流程。</p>
+                <div class="arrow">开始模拟交易 →</div>
+            </div>
+            
+            <div class="guide-card">
+                <div class="guide-icon">📈</div>
+                <h3>我买过股票</h3>
+                <p>有经验了？直接开始交易！输入股票代码，快速买卖，查看资产变化。</p>
+                <div class="quick-trade-form">
+                    <div class="popular-stocks">
+                        <span class="popular-stocks-label">🔥 热门股票（点击查看详情）：</span>
+                        <div class="popular-stocks-list">
+                            <button class="popular-stock-btn" onclick="viewStockDetail('AAPL')">AAPL 苹果</button>
+                            <button class="popular-stock-btn" onclick="viewStockDetail('MSFT')">MSFT 微软</button>
+                            <button class="popular-stock-btn" onclick="viewStockDetail('GOOGL')">GOOGL 谷歌</button>
+                            <button class="popular-stock-btn" onclick="viewStockDetail('TSLA')">TSLA 特斯拉</button>
+                            <button class="popular-stock-btn" onclick="viewStockDetail('AMZN')">AMZN 亚马逊</button>
+                        </div>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="quickSymbol" placeholder="股票代码（如：AAPL）或搜索公司名称" maxlength="50">
+                        <div id="search-results" class="search-results"></div>
+                    </div>
+                    <input type="number" id="quickQuantity" placeholder="数量" min="1">
+                    <div class="btn-group">
+                        <button class="btn-buy" onclick="executeTrade('buy')">买入</button>
+                        <button class="btn-sell" onclick="executeTrade('sell')">卖出</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 新手指引模块 -->
+    <section class="tutorial-section">
+        <div class="tutorial-container">
+            <h2 class="tutorial-title">🎯 3步开始你的投资之旅</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4>查询股价</h4>
+                    <p>输入股票代码（如 AAPL）查看苹果公司当前股价，了解市场行情。</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4>模拟买入</h4>
+                    <p>点击买入按钮，体验真实的交易流程，零风险练习投资。</p>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4>查看资产</h4>
+                    <p>实时查看你的<span class="tooltip">持仓？<span class="tooltip-content">持仓 = 你手里现有的股票</span></span>和资产变化，学习投资策略。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 动态帮助元素 -->
+    <section class="help-section">
+        <div class="help-container">
+            <div class="help-grid">
+                <div class="help-card">
+                    <div class="icon">💡</div>
+                    <h4>实时提示</h4>
+                    <p>当前有 1,243 位小白正在练习中，加入他们一起学习吧！</p>
+                </div>
+                
+                <div class="help-card">
+                    <div class="icon">⭐</div>
+                    <h4>成功案例</h4>
+                    <p>小明 3 天前开始练习，已学会止盈止损，收益率达到 5.2%</p>
+                </div>
+                
+                <div class="help-card">
+                    <div class="icon">📊</div>
+                    <h4>数据统计</h4>
+                    <p>累计已有 50,000+ 用户通过模拟交易掌握投资技巧</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 底部功能区 -->
+    <section class="footer-section" id="faq">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-card">
+                    <div class="icon">📌</div>
+                    <h4>常见术语解释</h4>
+                    <p>不懂专业术语？查看我们的术语词典，轻松理解投资概念。</p>
+                </div>
+                
+                <div class="footer-card">
+                    <div class="icon">📺</div>
+                    <h4>视频教程</h4>
+                    <p>2分钟/集的短视频，快速掌握股票交易基础知识。</p>
+                </div>
+                
+                <div class="footer-card">
+                    <div class="icon">❓</div>
+                    <h4>在线客服</h4>
+                    <p>遇到问题？随时咨询我们的智能客服，24小时在线解答。</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2026 Trea Finance Lab | 虚拟交易，仅供学习，不构成投资建议</p>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        // 显示消息
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+        
+        // 显示新手指南
+        function showGuide(type) {
+            if (type === 'beginner') {
+                showMessage('正在打开新手指南...', 'success');
+            }
+        }
+        
+        // 快速交易（预填）
+        function quickTrade(symbol, quantity) {
+            document.getElementById('quickSymbol').value = symbol;
+            document.getElementById('quickQuantity').value = quantity;
+            document.getElementById('quickSymbol').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showMessage(`已预填：买入 ${quantity} 股 ${symbol}，点击买入按钮完成交易`, 'success');
+        }
+        
+        // 选择热门股票
+        function selectPopularStock(symbol) {
+            const input = document.getElementById('quickSymbol');
+            input.value = symbol;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.popular-stock-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            showMessage(`已选择 ${symbol}，请输入数量后交易`, 'success');
+        }
+        
+        // 查看股票详情
+        function viewStockDetail(symbol) {
+            window.location.href = `/stock/${symbol}`;
+        }
+        
+        // 执行交易
+        async function executeTrade(type) {
+            const symbol = document.getElementById('quickSymbol').value.toUpperCase().trim();
+            const quantity = parseInt(document.getElementById('quickQuantity').value);
+            
+            if (!symbol) {
+                showMessage('请输入股票代码', 'error');
+                return;
+            }
+            
+            if (!quantity || quantity <= 0) {
+                showMessage('请输入有效的数量', 'error');
+                return;
+            }
+            
+            const action = type === 'buy' ? '买入' : '卖出';
+            if (!confirm(`确认${action} ${quantity} 股 ${symbol}？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ symbol, quantity })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('交易失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // 股票搜索功能
+        const symbolInput = document.getElementById('quickSymbol');
+        const searchResults = document.getElementById('search-results');
+        
+        let searchTimeout;
+        
+        symbolInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            // 防抖处理
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/search/${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.results.length > 0) {
+                        displaySearchResults(data.results);
+                    } else {
+                        searchResults.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('搜索失败:', error);
+                    searchResults.style.display = 'none';
+                }
+            }, 300);
+        });
+        
+        function displaySearchResults(results) {
+            searchResults.innerHTML = '';
+            
+            results.forEach(stock => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <span class="search-result-symbol">${stock.symbol}</span>
+                    <span class="search-result-name">${stock.name}</span>
+                    <span class="search-result-sector">${stock.sector}</span>
+                    <span class="search-result-price">$${stock.price.toFixed(2)}</span>
+                `;
+                
+                item.addEventListener('click', function() {
+                    symbolInput.value = stock.symbol;
+                    searchResults.style.display = 'none';
+                });
+                
+                searchResults.appendChild(item);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // 点击外部关闭搜索结果
+        document.addEventListener('click', function(event) {
+            if (!symbolInput.contains(event.target) && !searchResults.contains(event.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
