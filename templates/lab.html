@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trea Finance Lab - 投资学习与交易平台</title>
+    <title>学习实验区 - Trea Finance Lab</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -128,42 +128,41 @@
             line-height: 1.6;
         }
         
-        /* 核心模块入口 */
-        .modules-section {
+        /* 实验卡片区 */
+        .experiments-section {
             padding: 80px 50px;
             background: white;
         }
         
-        .modules-container {
-            max-width: 1000px;
+        .experiments-container {
+            max-width: 1200px;
             margin: 0 auto;
         }
         
-        .modules-title {
+        .experiments-title {
             text-align: center;
             font-size: 2.2em;
             margin-bottom: 60px;
             color: #1e293b;
         }
         
-        .modules-grid {
+        .experiments-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
             gap: 40px;
         }
         
-        .module-card {
+        .experiment-card {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border: 1px solid #e2e8f0;
             border-radius: 24px;
-            padding: 50px;
+            padding: 40px;
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
-            text-align: center;
         }
         
-        .module-card::before {
+        .experiment-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -173,38 +172,74 @@
             background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
         }
         
-        .module-card:hover {
+        .experiment-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 25px 50px rgba(99, 102, 241, 0.15);
             border-color: #6366f1;
         }
         
-        .module-icon {
-            font-size: 5em;
-            margin-bottom: 30px;
-            display: block;
+        .experiment-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 25px;
         }
         
-        .module-card h2 {
-            font-size: 1.8em;
-            margin-bottom: 20px;
+        .experiment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .experiment-difficulty {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .experiment-difficulty.beginner {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+        }
+        
+        .experiment-difficulty.intermediate {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+        
+        .experiment-difficulty.advanced {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+        }
+        
+        .experiment-duration {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+        
+        .experiment-card h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
             color: #1e293b;
         }
         
-        .module-card p {
+        .experiment-card p {
             color: #64748b;
             line-height: 1.7;
-            font-size: 1.1em;
-            margin-bottom: 30px;
+            font-size: 1.05em;
+            margin-bottom: 25px;
         }
         
         .btn-primary {
-            padding: 18px 45px;
+            padding: 15px 35px;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1em;
+            border-radius: 10px;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -216,33 +251,6 @@
         .btn-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        }
-        
-        /* 学习进度链接 */
-        .progress-section {
-            padding: 60px 50px;
-            background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 100%);
-            text-align: center;
-        }
-        
-        .progress-link {
-            display: inline-block;
-            padding: 15px 30px;
-            background: white;
-            color: #6366f1;
-            border: 2px solid #6366f1;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-        
-        .progress-link:hover {
-            background: #6366f1;
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
         
         /* 底部 */
@@ -280,18 +288,17 @@
                 font-size: 1.1em;
             }
             
-            .modules-section,
-            .progress-section {
+            .experiments-section {
                 padding: 60px 20px;
             }
             
-            .modules-grid {
+            .experiments-grid {
                 grid-template-columns: 1fr;
                 gap: 30px;
             }
             
-            .module-card {
-                padding: 40px 30px;
+            .experiment-card {
+                padding: 30px 25px;
             }
         }
     </style>
@@ -301,8 +308,8 @@
     <nav class="navbar">
         <div class="logo">🚀 Trea Finance Lab</div>
         <ul class="nav-links">
-            <li><a href="/" class="active">首页</a></li>
-            <li><a href="/lab">学习实验区</a></li>
+            <li><a href="/">首页</a></li>
+            <li><a href="/lab" class="active">学习实验区</a></li>
             <li><a href="/trade">自由交易区</a></li>
             <li><a href="/account">我的账户</a></li>
         </ul>
@@ -310,38 +317,53 @@
     
     <!-- 英雄区 -->
     <section class="hero">
-        <div class="hero-badge">🎯 投资学习与交易平台</div>
-        <h1>欢迎来到 Trea Finance Lab</h1>
-        <p class="subtitle">选择你的学习与交易模式，开启投资之旅</p>
+        <div class="hero-badge">🧪 结构化学习</div>
+        <h1>学习实验区</h1>
+        <p class="subtitle">通过系统化的实验课程，学习投资知识，练习交易策略，获得专业复盘</p>
     </section>
     
-    <!-- 核心模块入口 -->
-    <section class="modules-section">
-        <div class="modules-container">
-            <h2 class="modules-title">选择你的模式</h2>
-            <div class="modules-grid">
-                <!-- 学习实验区 -->
-                <div class="module-card">
-                    <div class="module-icon">🧪</div>
-                    <h2>学习实验区</h2>
-                    <p>通过结构化的实验课程学习投资知识，在安全的环境中练习交易策略，获得详细的复盘报告。</p>
-                    <a href="/lab" class="btn-primary">开始学习</a>
+    <!-- 实验卡片区 -->
+    <section class="experiments-section">
+        <div class="experiments-container">
+            <h2 class="experiments-title">实验大厅</h2>
+            <div class="experiments-grid">
+                <!-- 实验1 -->
+                <div class="experiment-card">
+                    <img src="{{ experiments[0].image }}" alt="新手入门：基础交易策略" class="experiment-image">
+                    <div class="experiment-header">
+                        <span class="experiment-difficulty beginner">入门</span>
+                        <span class="experiment-duration">{{ experiments[0].duration }}</span>
+                    </div>
+                    <h2>{{ experiments[0].title }}</h2>
+                    <p>{{ experiments[0].description }}</p>
+                    <a href="/lab/experiment/{{ experiments[0].id }}" class="btn-primary">开始实验</a>
                 </div>
                 
-                <!-- 自由交易区 -->
-                <div class="module-card">
-                    <div class="module-icon">🎮</div>
-                    <h2>自由交易区</h2>
-                    <p>使用10万虚拟资金自由交易真实股票，实时查看市场行情，管理个人资产，体验真实交易流程。</p>
-                    <a href="/trade" class="btn-primary">开始交易</a>
+                <!-- 实验2 -->
+                <div class="experiment-card">
+                    <img src="{{ experiments[1].image }}" alt="趋势交易：跟随市场走势" class="experiment-image">
+                    <div class="experiment-header">
+                        <span class="experiment-difficulty intermediate">中级</span>
+                        <span class="experiment-duration">{{ experiments[1].duration }}</span>
+                    </div>
+                    <h2>{{ experiments[1].title }}</h2>
+                    <p>{{ experiments[1].description }}</p>
+                    <a href="/lab/experiment/{{ experiments[1].id }}" class="btn-primary">开始实验</a>
+                </div>
+                
+                <!-- 实验3 -->
+                <div class="experiment-card">
+                    <img src="{{ experiments[2].image }}" alt="价值投资：寻找低估股票" class="experiment-image">
+                    <div class="experiment-header">
+                        <span class="experiment-difficulty advanced">高级</span>
+                        <span class="experiment-duration">{{ experiments[2].duration }}</span>
+                    </div>
+                    <h2>{{ experiments[2].title }}</h2>
+                    <p>{{ experiments[2].description }}</p>
+                    <a href="/lab/experiment/{{ experiments[2].id }}" class="btn-primary">开始实验</a>
                 </div>
             </div>
         </div>
-    </section>
-    
-    <!-- 学习进度链接 -->
-    <section class="progress-section">
-        <a href="/account" class="progress-link">查看我的学习进度</a>
     </section>
     
     <!-- 底部 -->

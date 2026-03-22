@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易历史 - Trea Finance Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 0 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            padding: 8px 0;
+            position: relative;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #6366f1;
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 2px;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            padding: 120px 50px 40px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .page-header p {
+            font-size: 1.2em;
+            color: #64748b;
+        }
+        
+        /* 主要内容区 */
+        .main-content {
+            padding: 60px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 交易历史 */
+        .history-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+        
+        .history-section h2 {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+        
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .transactions-table th {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .transactions-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .transactions-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .transaction-type-buy {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .transaction-type-sell {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .transaction-profit-positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .transaction-profit-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        /* 持仓列表 */
+        .holdings-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+        
+        .holdings-section h2 {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+        
+        .holdings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .holdings-table th {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .holdings-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .holdings-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .holding-profit-positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .holding-profit-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        
+        .btn-primary {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* 底部 */
+        .footer {
+            padding: 40px 50px;
+            background: white;
+            text-align: center;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .footer p {
+            color: #64748b;
+            font-size: 0.95em;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                gap: 20px;
+            }
+            
+            .page-header {
+                padding: 120px 20px 40px;
+            }
+            
+            .page-header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 40px 20px;
+            }
+            
+            .history-section,
+            .holdings-section {
+                padding: 30px 25px;
+            }
+            
+            .transactions-table,
+            .holdings-table {
+                font-size: 0.9em;
+            }
+            
+            .transactions-table th,
+            .transactions-table td,
+            .holdings-table th,
+            .holdings-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">🚀 Trea Finance Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">首页</a></li>
+            <li><a href="/lab">学习实验区</a></li>
+            <li><a href="/trade" class="active">自由交易区</a></li>
+            <li><a href="/account">我的账户</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 页面标题 -->
+    <section class="page-header">
+        <h1>交易历史</h1>
+        <p>查看你的交易记录和当前持仓</p>
+    </section>
+    
+    <!-- 主要内容区 -->
+    <main class="main-content">
+        <!-- 交易历史 -->
+        <section class="history-section">
+            <h2>📋 交易记录</h2>
+            {% if transactions %}
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>类型</th>
+                            <th>股票</th>
+                            <th>数量</th>
+                            <th>价格</th>
+                            <th>金额</th>
+                            <th>手续费</th>
+                            <th>盈亏</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                            <tr>
+                                <td>{{ transaction.timestamp }}</td>
+                                <td class="transaction-type-{{ transaction.type }}">{{ transaction.type }}</td>
+                                <td>{{ transaction.symbol }}</td>
+                                <td>{{ transaction.quantity }}</td>
+                                <td>¥{{ "%.2f"|format(transaction.price) }}</td>
+                                <td>¥{{ "%.2f"|format(transaction.amount) }}</td>
+                                <td>¥{{ "%.2f"|format(transaction.fee) }}</td>
+                                <td class="transaction-profit-{% if transaction.profit_loss >= 0 %}positive{% else %}negative{% endif %}">
+                                    {% if transaction.profit_loss %}
+                                        {% if transaction.profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(transaction.profit_loss) }}
+                                    {% else %}
+                                        -  
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <h3>暂无交易记录</h3>
+                    <p>你还没有进行任何交易，开始体验模拟交易吧！</p>
+                    <a href="/trade" class="btn-primary">开始交易</a>
+                </div>
+            {% endif %}
+        </section>
+        
+        <!-- 持仓列表 -->
+        <section class="holdings-section">
+            <h2>📈 我买过的股票</h2>
+            {% if holdings %}
+                <table class="holdings-table">
+                    <thead>
+                        <tr>
+                            <th>股票</th>
+                            <th>持仓数量</th>
+                            <th>持仓成本</th>
+                            <th>当前价格</th>
+                            <th>市值</th>
+                            <th>盈亏</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for holding in holdings %}
+                            <tr>
+                                <td>{{ holding.symbol }}</td>
+                                <td>{{ holding.quantity }}</td>
+                                <td>¥{{ "%.2f"|format(holding.average_price) }}</td>
+                                <td>¥{{ "%.2f"|format(holding.current_price) }}</td>
+                                <td>¥{{ "%.2f"|format(holding.market_value) }}</td>
+                                <td class="holding-profit-{% if holding.profit_loss >= 0 %}positive{% else %}negative{% endif %}">
+                                    {% if holding.profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(holding.profit_loss) }} ({% if holding.profit_loss_pct >= 0 %}+{% endif %}{{ "%.2f"|format(holding.profit_loss_pct) }}%)
+                                </td>
+                                <td>
+                                    <a href="/trade/stock/{{ holding.symbol }}" style="color: #6366f1; text-decoration: none; font-weight: 600;">查看详情</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <h3>暂无持仓</h3>
+                    <p>你还没有购买任何股票，开始体验模拟交易吧！</p>
+                    <a href="/trade" class="btn-primary">开始交易</a>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+    
+    <!-- 底部 -->
+    <footer class="footer">
+        <p>© 2026 Trea Finance Lab | 虚拟交易，仅供学习，不构成投资建议</p>
+    </footer>
+</body>
+</html>

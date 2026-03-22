@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自由交易区 - Trea Finance Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- ECharts 用于K线图 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 0 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            padding: 8px 0;
+            position: relative;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #6366f1;
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 2px;
+        }
+        
+        /* 主要内容区 */
+        .main-content {
+            padding-top: 70px;
+            min-height: calc(100vh - 70px);
+            display: flex;
+            flex-direction: row;
+        }
+        
+        /* 左侧栏 */
+        .left-sidebar {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+        
+        /* 账户总览 */
+        .account-overview {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .account-overview h2 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .account-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .account-stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .account-stat-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .account-stat-value {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .account-stat-value.profit-positive {
+            color: #10b981;
+        }
+        
+        .account-stat-value.profit-negative {
+            color: #ef4444;
+        }
+        
+        /* 股票搜索 */
+        .stock-search {
+            margin-bottom: 30px;
+        }
+        
+        .stock-search h3 {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .search-container input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .search-container input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-symbol {
+            font-weight: 600;
+            color: #6366f1;
+            margin-right: 8px;
+        }
+        
+        .search-result-name {
+            color: #1e293b;
+            margin-right: 12px;
+        }
+        
+        .search-result-sector {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-right: 8px;
+        }
+        
+        .search-result-price {
+            color: #10b981;
+            font-weight: 600;
+            float: right;
+        }
+        
+        /* 自选股列表 */
+        .watchlist {
+            margin-bottom: 30px;
+        }
+        
+        .watchlist h3 {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .watchlist-items {
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .watchlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .watchlist-item:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .watchlist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .watchlist-item.active {
+            background-color: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid #6366f1;
+        }
+        
+        .watchlist-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .watchlist-item-symbol {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .watchlist-item-name {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+        
+        .watchlist-item-price {
+            text-align: right;
+        }
+        
+        .watchlist-item-current {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .watchlist-item-change {
+            font-size: 0.9em;
+            margin-top: 2px;
+        }
+        
+        .watchlist-item-change.positive {
+            color: #10b981;
+        }
+        
+        .watchlist-item-change.negative {
+            color: #ef4444;
+        }
+        
+        /* 右侧主区域 */
+        .right-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* K线图区域 */
+        .chart-section {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            height: 400px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chart-period-btn {
+            padding: 6px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .chart-period-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .chart-period-btn.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: calc(100% - 60px);
+        }
+        
+        /* 交易面板 */
+        .trade-panel {
+            background: white;
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .trade-panel h2 {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            color: #1e293b;
+        }
+        
+        .trade-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .quantity-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .quantity-btn {
+            flex: 1;
+            padding: 10px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quantity-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .trade-buttons {
+            display: flex;
+            gap: 15px;
+            grid-column: 1 / -1;
+        }
+        
+        .btn-buy {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-sell {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-buy:hover,
+        .btn-sell:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 底部标签页 */
+        .tabs-section {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px 20px;
+            background: white;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #64748b;
+        }
+        
+        .tab-btn:hover {
+            color: #6366f1;
+        }
+        
+        .tab-btn.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+        
+        .tab-content {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .tab-content.hidden {
+            display: none;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .data-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .transaction-type-buy {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .transaction-type-sell {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        .transaction-profit-positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .transaction-profit-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        
+        /* 消息提示 */
+        .message {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .message.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .message.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .left-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+                padding: 20px;
+            }
+            
+            .account-overview,
+            .stock-search,
+            .watchlist {
+                margin-bottom: 20px;
+            }
+            
+            .chart-section {
+                height: 300px;
+            }
+            
+            .trade-form {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                gap: 20px;
+            }
+            
+            .left-sidebar {
+                padding: 15px;
+            }
+            
+            .chart-section {
+                padding: 15px;
+            }
+            
+            .trade-panel {
+                padding: 20px;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">🚀 Trea Finance Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">首页</a></li>
+            <li><a href="/lab">学习实验区</a></li>
+            <li><a href="/trade" class="active">自由交易区</a></li>
+            <li><a href="/account">我的账户</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 主要内容区 -->
+    <div class="main-content">
+        <!-- 左侧栏 -->
+        <div class="left-sidebar">
+            <!-- 股票搜索 -->
+            <div class="stock-search">
+                <h3>🔍 股票搜索</h3>
+                <div class="search-container">
+                    <input type="text" id="stockSymbol" placeholder="输入股票代码或公司名称" maxlength="50">
+                    <div id="search-results" class="search-results"></div>
+                </div>
+            </div>
+            
+            <!-- 自选股列表 -->
+            <div class="watchlist">
+                <h3>⭐ 自选股</h3>
+                <div class="watchlist-items">
+                    <div class="watchlist-item active" onclick="selectStock('AAPL')">
+                        <div class="watchlist-item-info">
+                            <div class="watchlist-item-symbol">AAPL</div>
+                            <div class="watchlist-item-name">苹果公司</div>
+                        </div>
+                        <div class="watchlist-item-price">
+                            <div class="watchlist-item-current">¥150.25</div>
+                            <div class="watchlist-item-change positive">+2.5%</div>
+                        </div>
+                    </div>
+                    <div class="watchlist-item" onclick="selectStock('MSFT')">
+                        <div class="watchlist-item-info">
+                            <div class="watchlist-item-symbol">MSFT</div>
+                            <div class="watchlist-item-name">微软公司</div>
+                        </div>
+                        <div class="watchlist-item-price">
+                            <div class="watchlist-item-current">¥280.75</div>
+                            <div class="watchlist-item-change positive">+1.8%</div>
+                        </div>
+                    </div>
+                    <div class="watchlist-item" onclick="selectStock('GOOGL')">
+                        <div class="watchlist-item-info">
+                            <div class="watchlist-item-symbol">GOOGL</div>
+                            <div class="watchlist-item-name">谷歌公司</div>
+                        </div>
+                        <div class="watchlist-item-price">
+                            <div class="watchlist-item-current">¥135.40</div>
+                            <div class="watchlist-item-change negative">-0.7%</div>
+                        </div>
+                    </div>
+                    <div class="watchlist-item" onclick="selectStock('TSLA')">
+                        <div class="watchlist-item-info">
+                            <div class="watchlist-item-symbol">TSLA</div>
+                            <div class="watchlist-item-name">特斯拉公司</div>
+                        </div>
+                        <div class="watchlist-item-price">
+                            <div class="watchlist-item-current">¥220.60</div>
+                            <div class="watchlist-item-change positive">+3.2%</div>
+                        </div>
+                    </div>
+                    <div class="watchlist-item" onclick="selectStock('AMZN')">
+                        <div class="watchlist-item-info">
+                            <div class="watchlist-item-symbol">AMZN</div>
+                            <div class="watchlist-item-name">亚马逊公司</div>
+                        </div>
+                        <div class="watchlist-item-price">
+                            <div class="watchlist-item-current">¥175.35</div>
+                            <div class="watchlist-item-change negative">-0.5%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 账户总览 -->
+            <div class="account-overview">
+                <h2>💰 账户总览</h2>
+                <div class="account-stats">
+                    <div class="account-stat-item">
+                        <span class="account-stat-label">总资产</span>
+                        <span class="account-stat-value">¥{{ "%.2f"|format(portfolio['total_assets']) }}</span>
+                    </div>
+                    <div class="account-stat-item">
+                        <span class="account-stat-label">可用资金</span>
+                        <span class="account-stat-value">¥{{ "%.2f"|format(portfolio['cash']) }}</span>
+                    </div>
+                    <div class="account-stat-item">
+                        <span class="account-stat-label">浮动盈亏</span>
+                        <span class="account-stat-value {% if portfolio['total_profit_loss'] >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                            {% if portfolio['total_profit_loss'] >= 0 %}+{% endif %}¥{{ "%.2f"|format(portfolio['total_profit_loss']) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧主区域 -->
+        <div class="right-main">
+            <!-- K线图区域 -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <div class="chart-title" id="chart-title">AAPL - 苹果公司</div>
+                    <div class="chart-controls">
+                        <button class="chart-period-btn active" onclick="changeChartPeriod('1d')">日线</button>
+                        <button class="chart-period-btn" onclick="changeChartPeriod('1w')">周线</button>
+                        <button class="chart-period-btn" onclick="changeChartPeriod('1m')">月线</button>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-container"></div>
+            </div>
+            
+            <!-- 交易面板 -->
+            <div class="trade-panel">
+                <h2>📈 交易操作</h2>
+                <form class="trade-form">
+                    <div class="form-group">
+                        <label for="symbol">股票代码</label>
+                        <input type="text" id="symbol" value="AAPL" placeholder="股票代码">
+                    </div>
+                    <div class="form-group">
+                        <label for="latestPrice">最新价</label>
+                        <input type="text" id="latestPrice" value="150.25" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">数量</label>
+                        <input type="number" id="quantity" placeholder="请输入数量" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">金额</label>
+                        <input type="text" id="amount" placeholder="交易金额" readonly>
+                    </div>
+                    <div class="quantity-buttons">
+                        <button type="button" class="quantity-btn" onclick="setQuantity(1)">1股</button>
+                        <button type="button" class="quantity-btn" onclick="setQuantity(10)">10股</button>
+                        <button type="button" class="quantity-btn" onclick="setQuantity(100)">100股</button>
+                    </div>
+                    <div class="trade-buttons">
+                        <button type="button" class="btn-buy" onclick="executeTrade('buy')">买入</button>
+                        <button type="button" class="btn-sell" onclick="executeTrade('sell')">卖出</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部标签页 -->
+    <div class="tabs-section">
+        <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('holdings')">我的持仓</button>
+            <button class="tab-btn" onclick="switchTab('orders')">今日委托</button>
+            <button class="tab-btn" onclick="switchTab('transactions')">成交记录</button>
+        </div>
+        <div class="tab-content" id="holdings-tab">
+            {% if portfolio.holdings %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>股票</th>
+                            <th>持仓数量</th>
+                            <th>持仓成本</th>
+                            <th>当前价格</th>
+                            <th>市值</th>
+                            <th>盈亏</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for holding in portfolio.holdings %}
+                            <tr>
+                                <td>{{ holding['symbol'] }}</td>
+                                <td>{{ holding['quantity'] }}</td>
+                                <td>¥{{ "%.2f"|format(holding['avg_cost']) }}</td>
+                                <td>¥{{ "%.2f"|format(holding['current_price']) }}</td>
+                                <td>¥{{ "%.2f"|format(holding['market_value']) }}</td>
+                                <td class="transaction-profit-{% if holding['profit_loss'] >= 0 %}positive{% else %}negative{% endif %}">
+                                    {% if holding['profit_loss'] >= 0 %}+{% endif %}¥{{ "%.2f"|format(holding['profit_loss']) }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">暂无持仓</p>
+            {% endif %}
+        </div>
+        <div class="tab-content hidden" id="orders-tab">
+            <p style="text-align: center; color: #64748b; padding: 40px;">暂无今日委托</p>
+        </div>
+        <div class="tab-content hidden" id="transactions-tab">
+            {% if transactions %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>类型</th>
+                            <th>股票</th>
+                            <th>数量</th>
+                            <th>价格</th>
+                            <th>金额</th>
+                            <th>盈亏</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                            <tr>
+                                <td>{{ transaction['timestamp'] }}</td>
+                                <td class="transaction-type-{{ transaction['type'] }}">{{ transaction['type'] }}</td>
+                                <td>{{ transaction['symbol'] }}</td>
+                                <td>{{ transaction['quantity'] }}</td>
+                                <td>¥{{ "%.2f"|format(transaction['price']) }}</td>
+                                <td>¥{{ "%.2f"|format(transaction['total_amount']) }}</td>
+                                <td class="transaction-profit-{% if transaction.get('profit_loss', 0) >= 0 %}positive{% else %}negative{% endif %}">
+                                    {% if transaction.get('profit_loss') %}
+                                        {% if transaction['profit_loss'] >= 0 %}+{% endif %}¥{{ "%.2f"|format(transaction['profit_loss']) }}
+                                    {% else %}
+                                        -  
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">暂无成交记录</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let currentSymbol = 'AAPL';
+        let currentPrice = 150.25;
+        let chart;
+        
+        // 初始化K线图
+        function initChart() {
+            chart = echarts.init(document.getElementById('chart-container'));
+            updateChart();
+        }
+        
+        // 更新K线图
+        function updateChart() {
+            // 模拟K线数据
+            const dates = [];
+            const data = [];
+            
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+                
+                const open = currentPrice * (0.95 + Math.random() * 0.1);
+                const close = open * (0.98 + Math.random() * 0.04);
+                const high = Math.max(open, close) * (1 + Math.random() * 0.02);
+                const low = Math.min(open, close) * (0.98 - Math.random() * 0.02);
+                
+                data.push([open.toFixed(2), high.toFixed(2), low.toFixed(2), close.toFixed(2)]);
+            }
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                legend: {
+                    data: ['K线']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: dates
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    name: 'K线',
+                    type: 'candlestick',
+                    data: data
+                }]
+            };
+            
+            chart.setOption(option);
+        }
+        
+        // 切换图表周期
+        function changeChartPeriod(period) {
+            // 更新按钮状态
+            document.querySelectorAll('.chart-period-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 这里可以根据周期更新图表数据
+            updateChart();
+        }
+        
+        // 选择股票
+        function selectStock(symbol) {
+            currentSymbol = symbol;
+            
+            // 更新交易面板
+            document.getElementById('symbol').value = symbol;
+            
+            // 模拟股票价格
+            const prices = {
+                'AAPL': 150.25,
+                'MSFT': 280.75,
+                'GOOGL': 135.40,
+                'TSLA': 220.60,
+                'AMZN': 175.35
+            };
+            
+            currentPrice = prices[symbol] || 100;
+            document.getElementById('latestPrice').value = currentPrice;
+            
+            // 更新图表标题
+            const stockNames = {
+                'AAPL': '苹果公司',
+                'MSFT': '微软公司',
+                'GOOGL': '谷歌公司',
+                'TSLA': '特斯拉公司',
+                'AMZN': '亚马逊公司'
+            };
+            document.getElementById('chart-title').textContent = `${symbol} - ${stockNames[symbol] || symbol}`;
+            
+            // 更新图表
+            updateChart();
+            
+            // 更新自选股列表选中状态
+            document.querySelectorAll('.watchlist-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // 设置数量
+        function setQuantity(quantity) {
+            document.getElementById('quantity').value = quantity;
+            updateAmount();
+        }
+        
+        // 更新金额
+        function updateAmount() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const amount = quantity * currentPrice;
+            document.getElementById('amount').value = amount.toFixed(2);
+        }
+        
+        // 监听数量变化
+        document.getElementById('quantity').addEventListener('input', updateAmount);
+        
+        // 执行交易
+        async function executeTrade(type) {
+            const symbol = document.getElementById('symbol').value.toUpperCase().trim();
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            if (!symbol) {
+                showMessage('请输入股票代码', 'error');
+                return;
+            }
+            
+            if (!quantity || quantity <= 0) {
+                showMessage('请输入有效的数量', 'error');
+                return;
+            }
+            
+            const action = type === 'buy' ? '买入' : '卖出';
+            if (!confirm(`确认${action} ${quantity} 股 ${symbol}？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/trade/${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ symbol, quantity })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('交易失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 切换标签页
+        function switchTab(tabName) {
+            // 更新按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 隐藏所有标签内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // 显示选中的标签内容
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+        }
+        
+        // 股票搜索功能
+        const stockSymbolInput = document.getElementById('stockSymbol');
+        const searchResults = document.getElementById('search-results');
+        
+        let searchTimeout;
+        
+        stockSymbolInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            // 防抖处理
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/trade/search/${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.results.length > 0) {
+                        displaySearchResults(data.results);
+                    } else {
+                        searchResults.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('搜索失败:', error);
+                    searchResults.style.display = 'none';
+                }
+            }, 300);
+        });
+        
+        function displaySearchResults(results) {
+            searchResults.innerHTML = '';
+            
+            results.forEach(stock => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <span class="search-result-symbol">${stock.symbol}</span>
+                    <span class="search-result-name">${stock.name}</span>
+                    <span class="search-result-sector">${stock.sector}</span>
+                    <span class="search-result-price">¥${stock.price.toFixed(2)}</span>
+                `;
+                
+                item.addEventListener('click', function() {
+                    selectStock(stock.symbol);
+                    searchResults.style.display = 'none';
+                });
+                
+                searchResults.appendChild(item);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // 点击外部关闭搜索结果
+        document.addEventListener('click', function(event) {
+            if (!stockSymbolInput.contains(event.target) && !searchResults.contains(event.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        // 显示消息
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+        
+        // 初始化
+        window.onload = function() {
+            initChart();
+            updateAmount();
+        };
+        
+        // 窗口大小变化时重绘图表
+        window.onresize = function() {
+            if (chart) {
+                chart.resize();
+            }
+        };
+    </script>
+</body>
+</html>

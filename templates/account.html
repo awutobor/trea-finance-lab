@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的账户 - Trea Finance Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 0 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            padding: 8px 0;
+            position: relative;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #6366f1;
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 2px;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            padding: 120px 50px 40px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .page-header p {
+            font-size: 1.2em;
+            color: #64748b;
+        }
+        
+        /* 主要内容区 */
+        .main-content {
+            padding: 60px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        /* 学习进度 */
+        .learning-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .learning-section h2 {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+        
+        .progress-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .progress-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .progress-percentage {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #6366f1;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #64748b;
+        }
+        
+        .courses-list {
+            margin-top: 30px;
+        }
+        
+        .courses-list h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .course-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .course-item:last-child {
+            border-bottom: none;
+        }
+        
+        .course-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .course-icon {
+            font-size: 1.5em;
+        }
+        
+        .course-details h4 {
+            font-size: 1.1em;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .course-details p {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+        
+        .course-status {
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        .course-status.completed {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+        }
+        
+        .course-status.in-progress {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+        
+        .course-status.not-started {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            color: #475569;
+        }
+        
+        /* 交易账户 */
+        .account-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .account-section h2 {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+        
+        .account-stats {
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .profit-positive {
+            color: #10b981;
+        }
+        
+        .profit-negative {
+            color: #ef4444;
+        }
+        
+        /* 快捷操作 */
+        .quick-actions {
+            margin-top: 30px;
+        }
+        
+        .quick-actions h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            color: #64748b;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .action-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* 重置账户按钮 */
+        .reset-section {
+            margin-top: 30px;
+        }
+        
+        .reset-btn {
+            padding: 12px 24px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                gap: 20px;
+            }
+            
+            .page-header {
+                padding: 120px 20px 40px;
+            }
+            
+            .page-header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 40px 20px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .learning-section,
+            .account-section {
+                padding: 30px 25px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">🚀 Trea Finance Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">首页</a></li>
+            <li><a href="/lab">学习实验区</a></li>
+            <li><a href="/trade">自由交易区</a></li>
+            <li><a href="/account" class="active">我的账户</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 页面标题 -->
+    <section class="page-header">
+        <h1>我的账户</h1>
+        <p>查看你的学习进度和交易账户信息</p>
+    </section>
+    
+    <!-- 主要内容区 -->
+    <main class="main-content">
+        <div class="content-grid">
+            <!-- 学习进度 -->
+            <div class="learning-section">
+                <h2>📚 学习进度</h2>
+                
+                <div class="progress-card">
+                    <div class="progress-header">
+                        <div class="progress-title">总体学习进度</div>
+                        <div class="progress-percentage">{{ "%.1f"|format(learning_progress.percentage) }}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ learning_progress.percentage }}%"></div>
+                    </div>
+                    <div class="progress-details">
+                        <div>已完成 {{ learning_progress.completed }} 个实验</div>
+                        <div>共 {{ learning_progress.total }} 个实验</div>
+                    </div>
+                </div>
+                
+                <div class="courses-list">
+                    <h3>实验课程</h3>
+                    <div class="course-item">
+                        <div class="course-info">
+                            <div class="course-icon">🧪</div>
+                            <div class="course-details">
+                                <h4>新手入门：基础交易策略</h4>
+                                <p>学习基本的股票交易操作，了解买卖流程和费用计算</p>
+                            </div>
+                        </div>
+                        <div class="course-status {% if learning_progress.completed >= 1 %}completed{% else %}not-started{% endif %}">
+                            {% if learning_progress.completed >= 1 %}已完成{% else %}未开始{% endif %}
+                        </div>
+                    </div>
+                    <div class="course-item">
+                        <div class="course-info">
+                            <div class="course-icon">📈</div>
+                            <div class="course-details">
+                                <h4>趋势交易：跟随市场走势</h4>
+                                <p>学习识别市场趋势，掌握趋势交易策略</p>
+                            </div>
+                        </div>
+                        <div class="course-status {% if learning_progress.completed >= 2 %}completed{% elif learning_progress.completed >= 1 %}in-progress{% else %}not-started{% endif %}">
+                            {% if learning_progress.completed >= 2 %}已完成{% elif learning_progress.completed >= 1 %}进行中{% else %}未开始{% endif %}
+                        </div>
+                    </div>
+                    <div class="course-item">
+                        <div class="course-info">
+                            <div class="course-icon">💎</div>
+                            <div class="course-details">
+                                <h4>价值投资：寻找低估股票</h4>
+                                <p>学习基本面分析，识别具有投资价值的股票</p>
+                            </div>
+                        </div>
+                        <div class="course-status {% if learning_progress.completed >= 3 %}completed{% elif learning_progress.completed >= 1 %}in-progress{% else %}not-started{% endif %}">
+                            {% if learning_progress.completed >= 3 %}已完成{% elif learning_progress.completed >= 1 %}进行中{% else %}未开始{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 交易账户 -->
+            <div class="account-section">
+                <h2>💰 交易账户</h2>
+                
+                <div class="account-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">总资产</span>
+                        <span class="stat-value">¥{{ "%.2f"|format(trade_portfolio.total_assets) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">可用现金</span>
+                        <span class="stat-value">¥{{ "%.2f"|format(trade_portfolio.cash) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">股票市值</span>
+                        <span class="stat-value">¥{{ "%.2f"|format(trade_portfolio.stock_value) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">今日盈亏</span>
+                        <span class="stat-value {% if trade_portfolio.daily_profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                            {% if trade_portfolio.daily_profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(trade_portfolio.daily_profit_loss) }} ({% if trade_portfolio.daily_profit_loss_pct >= 0 %}+{% endif %}{{ "%.2f"|format(trade_portfolio.daily_profit_loss_pct) }}%)
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">总盈亏</span>
+                        <span class="stat-value {% if trade_portfolio.total_profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                            {% if trade_portfolio.total_profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(trade_portfolio.total_profit_loss) }} ({% if trade_portfolio.total_profit_loss_pct >= 0 %}+{% endif %}{{ "%.2f"|format(trade_portfolio.total_profit_loss_pct) }}%)
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- 快捷操作 -->
+                <div class="quick-actions">
+                    <h3>⚡ 快捷操作</h3>
+                    <div class="action-buttons">
+                        <a href="/trade" class="action-btn">
+                            <span>🎮</span>
+                            <span>进入自由交易</span>
+                        </a>
+                        <a href="/trade/history" class="action-btn">
+                            <span>📋</span>
+                            <span>查看交易历史</span>
+                        </a>
+                        <a href="/lab" class="action-btn">
+                            <span>🧪</span>
+                            <span>开始学习实验</span>
+                        </a>
+                        <button class="action-btn" onclick="resetAccount()">
+                            <span>🔄</span>
+                            <span>重置账户</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 重置账户按钮 -->
+                <div class="reset-section">
+                    <button class="reset-btn" onclick="resetAccount()">重置账户</button>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #64748b;">重置后所有交易数据将被清除，现金恢复为10万元</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // 重置账户
+        function resetAccount() {
+            if (confirm('确定要重置账户吗？所有交易数据将被清除，现金恢复为10万元。')) {
+                fetch('/api/trade/reset', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('账户已重置', 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showMessage('重置失败，请稍后重试', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('重置失败，请稍后重试', 'error');
+                });
+            }
+        }
+        
+        // 显示消息
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

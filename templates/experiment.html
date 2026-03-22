@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ experiment.title }} - Trea Finance Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            padding: 0 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            padding: 8px 0;
+            position: relative;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #6366f1;
+        }
+        
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 2px;
+        }
+        
+        /* 实验标题区 */
+        .experiment-header {
+            padding: 120px 50px 40px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            text-align: center;
+        }
+        
+        .experiment-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .experiment-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .experiment-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 1.1em;
+        }
+        
+        .experiment-description {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #64748b;
+        }
+        
+        /* 主要内容区 */
+        .main-content {
+            padding: 60px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+        
+        /* 交易区 */
+        .trading-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .trading-section h2 {
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+        
+        /* 股票搜索 */
+        .stock-search {
+            margin-bottom: 30px;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .search-container input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+        
+        .search-container input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-result-symbol {
+            font-weight: 600;
+            color: #6366f1;
+            margin-right: 8px;
+        }
+        
+        .search-result-name {
+            color: #1e293b;
+            margin-right: 12px;
+        }
+        
+        .search-result-sector {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-right: 8px;
+        }
+        
+        .search-result-price {
+            color: #10b981;
+            font-weight: 600;
+            float: right;
+        }
+        
+        /* 热门股票 */
+        .popular-stocks {
+            margin-bottom: 30px;
+        }
+        
+        .popular-stocks-label {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .popular-stocks-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .popular-stock-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #475569;
+        }
+        
+        .popular-stock-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-1px);
+        }
+        
+        /* 交易表单 */
+        .trade-form {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .quantity-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .quantity-btn {
+            flex: 1;
+            padding: 10px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quantity-btn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        
+        .trade-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-buy {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-sell {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-buy:hover,
+        .btn-sell:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 资产概览 */
+        .portfolio-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .portfolio-section h2 {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            color: #1e293b;
+        }
+        
+        .portfolio-stats {
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .profit-positive {
+            color: #10b981;
+        }
+        
+        .profit-negative {
+            color: #ef4444;
+        }
+        
+        /* 持仓列表 */
+        .holdings-section {
+            margin-top: 30px;
+        }
+        
+        .holdings-section h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .holding-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .holding-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        }
+        
+        .holding-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .holding-symbol {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .holding-quantity {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+        
+        .holding-price {
+            text-align: right;
+        }
+        
+        .holding-current-price {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .holding-profit {
+            font-size: 0.9em;
+        }
+        
+        /* 实验控制 */
+        .experiment-controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+        
+        .btn-secondary:hover {
+            background: #6366f1;
+            color: white;
+        }
+        
+        /* 消息提示 */
+        .message {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .message.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .message.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                gap: 20px;
+            }
+            
+            .experiment-header {
+                padding: 120px 20px 40px;
+            }
+            
+            .experiment-header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 40px 20px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .trading-section,
+            .portfolio-section {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">🚀 Trea Finance Lab</div>
+        <ul class="nav-links">
+            <li><a href="/">首页</a></li>
+            <li><a href="/lab" class="active">学习实验区</a></li>
+            <li><a href="/trade">自由交易区</a></li>
+            <li><a href="/account">我的账户</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 实验标题区 -->
+    <section class="experiment-header">
+        <h1>{{ experiment.title }}</h1>
+        <div class="experiment-meta">
+            <div class="experiment-meta-item">
+                <span>📊</span>
+                <span>难度：{{ experiment.difficulty }}</span>
+            </div>
+            <div class="experiment-meta-item">
+                <span>⏱️</span>
+                <span>预计时长：{{ experiment.duration }}</span>
+            </div>
+        </div>
+        <p class="experiment-description">{{ experiment.description }}</p>
+    </section>
+    
+    <!-- 主要内容区 -->
+    <main class="main-content">
+        <div class="content-grid">
+            <!-- 交易区 -->
+            <div class="trading-section">
+                <h2>📈 模拟交易</h2>
+                
+                <!-- 股票搜索 -->
+                <div class="stock-search">
+                    <div class="search-container">
+                        <input type="text" id="stockSymbol" placeholder="输入股票代码（如：AAPL）或搜索公司名称" maxlength="50">
+                        <div id="search-results" class="search-results"></div>
+                    </div>
+                </div>
+                
+                <!-- 热门股票 -->
+                <div class="popular-stocks">
+                    <div class="popular-stocks-label">🔥 热门股票：</div>
+                    <div class="popular-stocks-list">
+                        <button class="popular-stock-btn" onclick="selectStock('AAPL')">AAPL 苹果</button>
+                        <button class="popular-stock-btn" onclick="selectStock('MSFT')">MSFT 微软</button>
+                        <button class="popular-stock-btn" onclick="selectStock('GOOGL')">GOOGL 谷歌</button>
+                        <button class="popular-stock-btn" onclick="selectStock('TSLA')">TSLA 特斯拉</button>
+                        <button class="popular-stock-btn" onclick="selectStock('AMZN')">AMZN 亚马逊</button>
+                    </div>
+                </div>
+                
+                <!-- 交易表单 -->
+                <div class="trade-form">
+                    <div class="form-group">
+                        <label for="symbol">股票代码</label>
+                        <input type="text" id="symbol" placeholder="股票代码">
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">数量</label>
+                        <input type="number" id="quantity" placeholder="请输入数量" min="1">
+                    </div>
+                    <div class="quantity-buttons">
+                        <button class="quantity-btn" onclick="setQuantity(1)">1股</button>
+                        <button class="quantity-btn" onclick="setQuantity(10)">10股</button>
+                        <button class="quantity-btn" onclick="setQuantity(100)">100股</button>
+                    </div>
+                    <div class="trade-buttons">
+                        <button class="btn-buy" onclick="executeTrade('buy')">买入</button>
+                        <button class="btn-sell" onclick="executeTrade('sell')">卖出</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 资产概览 -->
+            <div class="portfolio-section">
+                <h2>💰 资产概览</h2>
+                
+                <div class="portfolio-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">总资产</span>
+                        <span class="stat-value">¥{{ "%.2f"|format(portfolio.total_assets) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">可用现金</span>
+                        <span class="stat-value">¥{{ "%.2f"|format(portfolio.cash) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">股票市值</span>
+                        <span class="stat-value">¥{{ "%.2f"|format(portfolio.stock_value) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">今日盈亏</span>
+                        <span class="stat-value {% if portfolio.daily_profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                            {% if portfolio.daily_profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(portfolio.daily_profit_loss) }} ({% if portfolio.daily_profit_loss_pct >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.daily_profit_loss_pct) }}%)
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">总盈亏</span>
+                        <span class="stat-value {% if portfolio.total_profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                            {% if portfolio.total_profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(portfolio.total_profit_loss) }} ({% if portfolio.total_profit_loss_pct >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.total_profit_loss_pct) }}%)
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- 持仓列表 -->
+                <div class="holdings-section">
+                    <h3>📋 当前持仓</h3>
+                    {% if portfolio.holdings %}
+                        {% for holding in portfolio.holdings %}
+                            <div class="holding-item" onclick="selectStock('{{ holding.symbol }}')">
+                                <div class="holding-info">
+                                    <span class="holding-symbol">{{ holding.symbol }}</span>
+                                    <span class="holding-quantity">{{ holding.quantity }} 股</span>
+                                </div>
+                                <div class="holding-price">
+                                    <div class="holding-current-price">¥{{ "%.2f"|format(holding.current_price) }}</div>
+                                    <div class="holding-profit {% if holding.profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                                        {% if holding.profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(holding.profit_loss) }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: #64748b; text-align: center; padding: 20px;">暂无持仓</p>
+                    {% endif %}
+                </div>
+                
+                <!-- 实验控制 -->
+                <div class="experiment-controls">
+                    <a href="/lab/report/{{ experiment.id }}" class="btn-secondary">查看实验报告</a>
+                    <button class="btn-secondary" onclick="resetExperiment()">重置实验</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // 实验ID
+        const experimentId = '{{ experiment.id }}';
+        
+        // 显示消息
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+        
+        // 选择股票
+        function selectStock(symbol) {
+            document.getElementById('symbol').value = symbol;
+            document.getElementById('stockSymbol').value = symbol;
+            showMessage(`已选择 ${symbol}，请输入数量后交易`, 'success');
+        }
+        
+        // 设置数量
+        function setQuantity(quantity) {
+            document.getElementById('quantity').value = quantity;
+        }
+        
+        // 执行交易
+        async function executeTrade(type) {
+            const symbol = document.getElementById('symbol').value.toUpperCase().trim();
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            if (!symbol) {
+                showMessage('请输入股票代码', 'error');
+                return;
+            }
+            
+            if (!quantity || quantity <= 0) {
+                showMessage('请输入有效的数量', 'error');
+                return;
+            }
+            
+            const action = type === 'buy' ? '买入' : '卖出';
+            if (!confirm(`确认${action} ${quantity} 股 ${symbol}？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/experiment/${experimentId}/${type}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ symbol, quantity })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('交易失败，请稍后重试', 'error');
+            }
+        }
+        
+        // 重置实验
+        function resetExperiment() {
+            if (confirm('确定要重置实验吗？所有交易数据将被清除。')) {
+                fetch(`/api/experiment/${experimentId}/reset`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('实验已重置', 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showMessage('重置失败，请稍后重试', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('重置失败，请稍后重试', 'error');
+                });
+            }
+        }
+        
+        // 股票搜索功能
+        const stockSymbolInput = document.getElementById('stockSymbol');
+        const searchResults = document.getElementById('search-results');
+        
+        let searchTimeout;
+        
+        stockSymbolInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            // 防抖处理
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/trade/search/${encodeURIComponent(query)}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.results.length > 0) {
+                        displaySearchResults(data.results);
+                    } else {
+                        searchResults.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('搜索失败:', error);
+                    searchResults.style.display = 'none';
+                }
+            }, 300);
+        });
+        
+        function displaySearchResults(results) {
+            searchResults.innerHTML = '';
+            
+            results.forEach(stock => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <span class="search-result-symbol">${stock.symbol}</span>
+                    <span class="search-result-name">${stock.name}</span>
+                    <span class="search-result-sector">${stock.sector}</span>
+                    <span class="search-result-price">¥${stock.price.toFixed(2)}</span>
+                `;
+                
+                item.addEventListener('click', function() {
+                    selectStock(stock.symbol);
+                    searchResults.style.display = 'none';
+                });
+                
+                searchResults.appendChild(item);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // 点击外部关闭搜索结果
+        document.addEventListener('click', function(event) {
+            if (!stockSymbolInput.contains(event.target) && !searchResults.contains(event.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
