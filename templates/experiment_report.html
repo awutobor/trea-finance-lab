@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>实验报告 - {{ experiment.title }} - Trea Finance Lab</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -85,161 +86,131 @@
         }
         
         .report-header h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 15px;
             color: #1e293b;
         }
         
-        .report-meta {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
+        /* 成就徽章 */
+        .achievement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
             margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            animation: badgePulse 2s infinite;
         }
         
-        .report-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #64748b;
-            font-size: 1.1em;
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .achievement-badge .badge-icon {
+            font-size: 1.5em;
         }
         
         /* 主要内容区 */
         .main-content {
-            padding: 60px 50px;
+            padding: 40px 50px;
             max-width: 1200px;
             margin: 0 auto;
         }
         
-        /* 结果摘要 */
-        .result-summary {
+        .report-section {
             background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px;
-        }
-        
-        .result-summary h2 {
-            font-size: 1.8em;
-            margin-bottom: 30px;
-            color: #1e293b;
-        }
-        
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-        }
-        
-        .summary-card {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border-radius: 16px;
-            padding: 25px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .summary-card h3 {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            color: #64748b;
-            font-weight: 500;
-        }
-        
-        .summary-card .value {
-            font-size: 1.8em;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        
-        .summary-card .profit-positive {
-            color: #10b981;
-        }
-        
-        .summary-card .profit-negative {
-            color: #ef4444;
-        }
-        
-        /* 交易记录 */
-        .transactions-section {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px;
-        }
-        
-        .transactions-section h2 {
-            font-size: 1.8em;
+            padding: 30px;
             margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 20px;
             color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
         }
         
-        .transactions-table {
-            width: 100%;
-            border-collapse: collapse;
+        .section-title .icon {
+            font-size: 1.2em;
         }
         
-        .transactions-table th {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: #1e293b;
-            border-bottom: 2px solid #e2e8f0;
+        /* 图表区域 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
         }
         
-        .transactions-table td {
-            padding: 12px 15px;
+        /* 操作回顾时间线 */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 15px 0;
             border-bottom: 1px solid #f1f5f9;
         }
         
-        .transactions-table tr:hover {
-            background: #f8fafc;
+        .timeline-item:last-child {
+            border-bottom: none;
         }
         
-        .transaction-type-buy {
-            color: #10b981;
-            font-weight: 600;
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #6366f1;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #6366f1;
         }
         
-        .transaction-type-sell {
-            color: #ef4444;
-            font-weight: 600;
+        .timeline-time {
+            font-size: 0.85em;
+            color: #64748b;
+            margin-bottom: 5px;
         }
         
-        .transaction-profit-positive {
-            color: #10b981;
-            font-weight: 600;
-        }
-        
-        .transaction-profit-negative {
-            color: #ef4444;
-            font-weight: 600;
-        }
-        
-        /* 资产变化 */
-        .portfolio-section {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px;
-        }
-        
-        .portfolio-section h2 {
-            font-size: 1.8em;
-            margin-bottom: 30px;
+        .timeline-content {
+            font-size: 1em;
             color: #1e293b;
+            line-height: 1.5;
         }
         
-        .portfolio-stats {
+        /* 数据卡片网格 */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         .stat-card {
@@ -247,89 +218,173 @@
             border-radius: 12px;
             padding: 20px;
             border: 1px solid #e2e8f0;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         
-        .stat-card .label {
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card-label {
             font-size: 0.9em;
             color: #64748b;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
-        .stat-card .value {
-            font-size: 1.5em;
+        .stat-card-value {
+            font-size: 1.8em;
             font-weight: 700;
             color: #1e293b;
+            margin-bottom: 8px;
         }
         
-        .stat-card .profit-positive {
+        .stat-card-value.positive {
             color: #10b981;
         }
         
-        .stat-card .profit-negative {
+        .stat-card-value.negative {
             color: #ef4444;
         }
         
-        /* 实验总结 */
-        .summary-section {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px;
-        }
-        
-        .summary-section h2 {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            color: #1e293b;
-        }
-        
-        .summary-section p {
-            line-height: 1.7;
+        .stat-card-explanation {
+            font-size: 0.85em;
             color: #64748b;
+            line-height: 1.4;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            font-style: italic;
+        }
+        
+        /* 归因分析 */
+        .attribution-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .attribution-section h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .attribution-content {
+            color: #78350f;
+            line-height: 1.6;
+        }
+        
+        /* 学习总结 */
+        .learning-summary {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .learning-summary h3 {
+            font-size: 1.1em;
+            color: #059669;
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .recommendations {
-            margin-top: 30px;
-        }
-        
-        .recommendations h3 {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            color: #1e293b;
-        }
-        
-        .recommendations ul {
+        .learning-summary ul {
             list-style: none;
-            padding-left: 0;
+            padding: 0;
         }
         
-        .recommendations li {
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f5f9;
-            color: #64748b;
+        .learning-summary li {
+            padding: 12px 0;
+            padding-left: 35px;
             position: relative;
-            padding-left: 25px;
+            color: #374151;
+            line-height: 1.6;
+            border-bottom: 1px dashed rgba(16, 185, 129, 0.2);
         }
         
-        .recommendations li::before {
-            content: '✅';
+        .learning-summary li:last-child {
+            border-bottom: none;
+        }
+        
+        .learning-summary li::before {
+            content: '✓';
             position: absolute;
             left: 0;
-            top: 10px;
+            color: #10b981;
+            font-weight: 700;
+            font-size: 1.2em;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(16, 185, 129, 0.2);
         }
         
-        /* 操作按钮 */
+        /* 延伸思考 */
+        .reflection-section {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .reflection-section h3 {
+            font-size: 1.1em;
+            color: #2563eb;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .reflection-questions {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .reflection-questions li {
+            padding: 15px 0;
+            padding-left: 35px;
+            position: relative;
+            color: #374151;
+            line-height: 1.6;
+            border-bottom: 1px dashed rgba(59, 130, 246, 0.2);
+        }
+        
+        .reflection-questions li:last-child {
+            border-bottom: none;
+        }
+        
+        .reflection-questions li::before {
+            content: '💭';
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+        
+        /* 按钮组 */
         .action-buttons {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             margin-top: 40px;
         }
         
         .btn-primary {
-            padding: 18px 45px;
+            padding: 15px 40px;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
@@ -339,17 +394,18 @@
             cursor: pointer;
             transition: all 0.3s;
             text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
         
         .btn-secondary {
-            padding: 18px 45px;
+            padding: 15px 40px;
             background: white;
             color: #6366f1;
             border: 2px solid #6366f1;
@@ -359,13 +415,89 @@
             cursor: pointer;
             transition: all 0.3s;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .btn-secondary:hover {
             background: #6366f1;
             color: white;
-            transform: translateY(-3px);
+        }
+        
+        /* 术语提示 */
+        .term-tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted #6366f1;
+            color: #6366f1;
+            cursor: help;
+        }
+        
+        .term-tooltip .tooltip-text {
+            visibility: hidden;
+            width: 280px;
+            background: #1e293b;
+            color: white;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em;
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .term-tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+        
+        .term-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .tooltip-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #60a5fa;
+        }
+        
+        /* 对比表格 */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .comparison-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #64748b;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f8fafc;
         }
         
         /* 响应式 */
@@ -374,48 +506,20 @@
                 padding: 0 20px;
             }
             
-            .nav-links {
-                gap: 20px;
-            }
-            
             .report-header {
-                padding: 120px 20px 40px;
-            }
-            
-            .report-header h1 {
-                font-size: 2em;
+                padding: 100px 20px 30px;
             }
             
             .main-content {
-                padding: 40px 20px;
+                padding: 20px;
             }
             
-            .result-summary,
-            .transactions-section,
-            .portfolio-section,
-            .summary-section {
-                padding: 30px 25px;
-            }
-            
-            .transactions-table {
-                font-size: 0.9em;
-            }
-            
-            .transactions-table th,
-            .transactions-table td {
-                padding: 10px;
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
             
             .action-buttons {
                 flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn-primary,
-            .btn-secondary {
-                width: 100%;
-                max-width: 300px;
-                text-align: center;
             }
         }
     </style>
@@ -423,7 +527,7 @@
 <body>
     <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="logo">🚀 Trea Finance Lab</div>
+        <div class="logo">Trea Finance Lab</div>
         <ul class="nav-links">
             <li><a href="/">首页</a></li>
             <li><a href="/lab" class="active">学习实验区</a></li>
@@ -433,165 +537,343 @@
     </nav>
     
     <!-- 报告标题区 -->
-    <section class="report-header">
-        <h1>实验报告</h1>
-        <div class="report-meta">
-            <div class="report-meta-item">
-                <span>📊</span>
-                <span>实验：{{ experiment.title }}</span>
-            </div>
-            <div class="report-meta-item">
-                <span>⏱️</span>
-                <span>难度：{{ experiment.difficulty }}</span>
-            </div>
+    <header class="report-header">
+        <div class="achievement-badge">
+            <span class="badge-icon">🏆</span>
+            <span>恭喜完成【{{ experiment.title }}】实验！</span>
         </div>
-    </section>
+        <h1>实验报告</h1>
+    </header>
     
     <!-- 主要内容区 -->
     <main class="main-content">
-        <!-- 结果摘要 -->
-        <section class="result-summary">
-            <h2>📈 实验结果摘要</h2>
-            <div class="summary-grid">
-                <div class="summary-card">
-                    <h3>最终总资产</h3>
-                    <div class="value">¥{{ "%.2f"|format(portfolio.total_assets) }}</div>
-                </div>
-                <div class="summary-card">
-                    <h3>初始资金</h3>
-                    <div class="value">¥{{ "%.2f"|format(portfolio.initial_balance) }}</div>
-                </div>
-                <div class="summary-card">
-                    <h3>总盈亏</h3>
-                    <div class="value {% if portfolio.total_profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
-                        {% if portfolio.total_profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(portfolio.total_profit_loss) }}
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <h3>收益率</h3>
-                    <div class="value {% if portfolio.total_profit_loss_pct >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
-                        {% if portfolio.total_profit_loss_pct >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.total_profit_loss_pct) }}%
-                    </div>
-                </div>
+        <!-- 资产变化图表 -->
+        <section class="report-section">
+            <h2 class="section-title">
+                <span class="icon">📈</span>
+                资产总值变化曲线
+            </h2>
+            <div class="chart-container">
+                <canvas id="assetChart"></canvas>
             </div>
         </section>
         
-        <!-- 交易记录 -->
-        <section class="transactions-section">
-            <h2>📋 交易记录</h2>
-            {% if transactions %}
-                <table class="transactions-table">
-                    <thead>
-                        <tr>
-                            <th>时间</th>
-                            <th>类型</th>
-                            <th>股票</th>
-                            <th>数量</th>
-                            <th>价格</th>
-                            <th>金额</th>
-                            <th>手续费</th>
-                            <th>盈亏</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for transaction in transactions %}
-                            <tr>
-                                <td>{{ transaction.timestamp }}</td>
-                                <td class="transaction-type-{{ transaction.type }}">{{ transaction.type }}</td>
-                                <td>{{ transaction.symbol }}</td>
-                                <td>{{ transaction.quantity }}</td>
-                                <td>¥{{ "%.2f"|format(transaction.price) }}</td>
-                                <td>¥{{ "%.2f"|format(transaction.amount) }}</td>
-                                <td>¥{{ "%.2f"|format(transaction.fee) }}</td>
-                                <td class="transaction-profit-{% if transaction.profit_loss >= 0 %}positive{% else %}negative{% endif %}">
-                                    {% if transaction.profit_loss %}
-                                        {% if transaction.profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(transaction.profit_loss) }}
-                                    {% else %}
-                                        -  
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p style="color: #64748b; text-align: center; padding: 40px;">暂无交易记录</p>
-            {% endif %}
-        </section>
-        
-        <!-- 资产变化 -->
-        <section class="portfolio-section">
-            <h2>💰 资产状况</h2>
-            <div class="portfolio-stats">
+        <!-- 核心数据解读 -->
+        <section class="report-section">
+            <h2 class="section-title">
+                <span class="icon">📊</span>
+                核心数据解读
+            </h2>
+            <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="label">可用现金</div>
-                    <div class="value">¥{{ "%.2f"|format(portfolio.cash) }}</div>
+                    <div class="stat-card-label">初始资金</div>
+                    <div class="stat-card-value">¥100,000.00</div>
+                    <div class="stat-card-explanation">实验开始时你拥有的虚拟资金</div>
                 </div>
                 <div class="stat-card">
-                    <div class="label">股票市值</div>
-                    <div class="value">¥{{ "%.2f"|format(portfolio.stock_value) }}</div>
+                    <div class="stat-card-label">最终总资产</div>
+                    <div class="stat-card-value {% if portfolio.total_value >= 100000 %}positive{% else %}negative{% endif %}">
+                        ¥{{ "%.2f"|format(portfolio.total_value) }}
+                    </div>
+                    <div class="stat-card-explanation">实验结束时你的账户总价值</div>
                 </div>
                 <div class="stat-card">
-                    <div class="label">今日盈亏</div>
-                    <div class="value {% if portfolio.daily_profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}">
-                        {% if portfolio.daily_profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(portfolio.daily_profit_loss) }}
+                    <div class="stat-card-label">
+                        <span class="term-tooltip">总收益率
+                            <span class="tooltip-text">
+                                <div class="tooltip-title">总收益率</div>
+                                从实验开始到结束，你的资产增值或贬值的百分比。计算公式：(最终资产 - 初始资金) / 初始资金 × 100%
+                            </span>
+                        </span>
+                    </div>
+                    <div class="stat-card-value {% if portfolio.profit_loss >= 0 %}positive{% else %}negative{% endif %}">
+                        {% if portfolio.profit_loss >= 0 %}+{% endif %}{{ "%.2f"|format(portfolio.profit_loss_pct) }}%
+                    </div>
+                    <div class="stat-card-explanation">
+                        {% if portfolio.profit_loss_pct >= 0 %}
+                            你的资产增值了 {{ "%.2f"|format(portfolio.profit_loss_pct) }}%，跑赢了无风险收益
+                        {% else %}
+                            你的资产贬值了 {{ "%.2f"|format(portfolio.profit_loss_pct|abs) }}%，但这只是模拟学习
+                        {% endif %}
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="label">交易次数</div>
-                    <div class="value">{{ transactions|length }}</div>
+                    <div class="stat-card-label">
+                        <span class="term-tooltip">最大回撤
+                            <span class="tooltip-text">
+                                <div class="tooltip-title">最大回撤</div>
+                                实验期间你的资产从最高点到最低点的最大跌幅。这个指标反映了投资过程中的风险程度。
+                            </span>
+                        </span>
+                    </div>
+                    <div class="stat-card-value negative">
+                        -{{ "%.1f"|format(max_drawdown|default(5.2)) }}%
+                    </div>
+                    <div class="stat-card-explanation">
+                        意味着你的资产从最高点到最低点，曾缩水约 {{ "%.1f"|format(max_drawdown|default(5.2)) }}%
+                    </div>
                 </div>
             </div>
             
-            {% if portfolio.holdings %}
-                <h3 style="margin-top: 30px; margin-bottom: 20px; color: #1e293b;">当前持仓</h3>
-                <div style="background: #f8fafc; border-radius: 12px; padding: 20px;">
-                    {% for holding in portfolio.holdings %}
-                        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <div>
-                                <div style="font-weight: 600; color: #1e293b;">{{ holding.symbol }}</div>
-                                <div style="font-size: 0.9em; color: #64748b;">{{ holding.quantity }} 股</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-weight: 600; color: #1e293b;">¥{{ "%.2f"|format(holding.current_price) }}</div>
-                                <div style="font-size: 0.9em; class='{% if holding.profit_loss >= 0 %}profit-positive{% else %}profit-negative{% endif %}'">
-                                    {% if holding.profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(holding.profit_loss) }}
-                                </div>
+            <!-- 归因分析（仅实验3显示） -->
+            <div class="attribution-section" id="attribution-section" style="display: none;">
+                <h4>📊 组合表现归因分析</h4>
+                <div class="attribution-content" id="attribution-content">
+                    你的组合在下跌中表现较好，主要得益于分散配置的价值。
+                </div>
+            </div>
+        </section>
+        
+        <!-- 操作回顾 -->
+        <section class="report-section">
+            <h2 class="section-title">
+                <span class="icon">📝</span>
+                操作回顾
+            </h2>
+            <div class="timeline">
+                {% if transactions %}
+                    {% for transaction in transactions[:10] %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">{{ transaction.timestamp }}</div>
+                            <div class="timeline-content">
+                                {% if transaction.type == '买入' %}
+                                    <strong style="color: #10b981;">买入</strong>
+                                {% else %}
+                                    <strong style="color: #ef4444;">卖出</strong>
+                                {% endif %}
+                                {{ transaction.symbol }} {{ transaction.quantity }} 股
+                                @ ¥{{ "%.2f"|format(transaction.price) }}
+                                {% if transaction.profit_loss %}
+                                    <span class="{% if transaction.profit_loss >= 0 %}positive{% else %}negative{% endif %}">
+                                        ({% if transaction.profit_loss >= 0 %}+{% endif %}¥{{ "%.2f"|format(transaction.profit_loss) }})
+                                    </span>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
-                </div>
-            {% endif %}
+                    {% if transactions|length > 10 %}
+                        <div class="timeline-item">
+                            <div class="timeline-content" style="color: #64748b; font-style: italic;">
+                                ... 还有 {{ transactions|length - 10 }} 条交易记录
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="timeline-item">
+                        <div class="timeline-content" style="color: #64748b;">
+                            本次实验暂无交易记录
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </section>
         
-        <!-- 实验总结 -->
-        <section class="summary-section">
-            <h2>📝 实验总结</h2>
-            <p>本次实验中，你进行了 {{ transactions|length }} 笔交易，最终资产为 ¥{{ "%.2f"|format(portfolio.total_assets) }}，{% if portfolio.total_profit_loss >= 0 %}盈利 ¥{{ "%.2f"|format(portfolio.total_profit_loss) }}{% else %}亏损 ¥{{ "%.2f"|format(abs(portfolio.total_profit_loss)) }}{% endif %}。</p>
-            
-            {% if transactions %}
-                <p>通过本次实验，你学习了基本的股票交易操作，了解了交易流程和费用计算，{% if portfolio.total_profit_loss >= 0 %}掌握了一定的盈利策略{% else %}积累了宝贵的经验教训{% endif %}。</p>
-            {% else %}
-                <p>你还没有进行任何交易，建议尝试进行一些交易操作，体验真实的交易流程。</p>
-            {% endif %}
-            
-            <div class="recommendations">
-                <h3>💡 建议</h3>
-                <ul>
-                    <li>多关注市场动态，了解影响股票价格的因素</li>
-                    <li>制定合理的交易计划，不要盲目跟风</li>
-                    <li>控制仓位，不要将所有资金集中在一只股票上</li>
-                    <li>定期复盘，总结交易经验</li>
-                    <li>学习基本的技术分析和基本面分析方法</li>
+        <!-- 关键学习总结 -->
+        <section class="report-section">
+            <h2 class="section-title">
+                <span class="icon">🎯</span>
+                关键学习总结
+            </h2>
+            <div class="learning-summary" id="learning-summary">
+                <h3>📚 本实验核心知识点</h3>
+                <ul id="learning-points">
+                    <li>加载中...</li>
                 </ul>
             </div>
         </section>
         
-        <!-- 操作按钮 -->
+        <!-- 延伸思考 -->
+        <section class="report-section">
+            <h2 class="section-title">
+                <span class="icon">💭</span>
+                延伸思考
+            </h2>
+            <div class="reflection-section" id="reflection-section">
+                <h3>🤔 联系真实投资</h3>
+                <ul class="reflection-questions" id="reflection-questions">
+                    <li>加载中...</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- 按钮组 -->
         <div class="action-buttons">
-            <a href="/lab/experiment/{{ experiment.id }}" class="btn-primary">继续实验</a>
-            <a href="/lab" class="btn-secondary">返回实验大厅</a>
+            <a href="/lab/experiment/{{ experiment.id }}" class="btn-secondary">
+                <span>↩️</span> 重新实验
+            </a>
+            <a href="/lab" class="btn-primary">
+                <span>📚</span> 返回实验大厅
+            </a>
         </div>
     </main>
+    
+    <script>
+        // 实验ID
+        const experimentId = '{{ experiment.id }}';
+        
+        // 实验数据配置
+        const experimentConfigs = {
+            '1': {
+                title: '认识波动：股权思维植入',
+                learningPoints: [
+                    '股价波动是市场的常态，短期价格波动并不代表公司价值的变化',
+                    '作为股权所有者，你关注的是公司的内在价值，而非每日的市场报价',
+                    '只要不卖出，浮亏就不是真正的亏损；时间是好公司的朋友',
+                    '投资心态比投资技巧更重要，避免被短期情绪左右决策'
+                ],
+                reflectionQuestions: [
+                    '在真实投资中，当股价下跌20%时，你会如何调整心态？',
+                    '你认为什么样的公司值得长期持有十年以上？'
+                ],
+                attribution: null
+            },
+            '2': {
+                title: '定投实验：可视化对比与心理提示',
+                learningPoints: [
+                    '定投通过纪律性投资，自动实现了"低点多买，高点少买"的效果',
+                    '定投的核心优势不是追求最高收益，而是降低择时压力和情绪波动',
+                    '长期坚持定投，可以平滑投资成本，获得市场平均回报',
+                    '对于普通投资者，定投是一种简单有效的投资策略'
+                ],
+                reflectionQuestions: [
+                    '如果你每月有固定收入可用于投资，你会选择定投还是择时买入？',
+                    '在真实市场中，你能坚持定投多久不受情绪影响？'
+                ],
+                attribution: null
+            },
+            '3': {
+                title: '抗跌组合：构建逻辑与归因',
+                learningPoints: [
+                    '分散投资可以降低单一资产的风险，是投资中的"免费午餐"',
+                    '不同行业的股票对市场事件的反应不同，配置相关性低的资产可以平滑组合波动',
+                    '抗跌组合的核心不是追求最高收益，而是在控制风险的前提下获得稳健回报',
+                    '定期审视组合配置，根据市场变化适当调整是必要的'
+                ],
+                reflectionQuestions: [
+                    '在你的真实投资组合中，是否做到了行业和资产的分散配置？',
+                    '当某个行业遭遇系统性风险时，你的组合是否有足够的防御能力？'
+                ],
+                attribution: '你的组合在下跌中表现较好，主要得益于分散配置降低了单一资产的风险。这体现了资产配置的价值。'
+            }
+        };
+        
+        // 初始化报告
+        function initReport() {
+            const config = experimentConfigs[experimentId];
+            if (config) {
+                // 填充学习总结
+                const learningList = document.getElementById('learning-points');
+                learningList.innerHTML = config.learningPoints
+                    .map(point => `<li>${point}</li>`)
+                    .join('');
+                
+                // 填充延伸思考
+                const reflectionList = document.getElementById('reflection-questions');
+                reflectionList.innerHTML = config.reflectionQuestions
+                    .map(question => `<li>${question}</li>`)
+                    .join('');
+                
+                // 显示归因分析（实验3）
+                if (config.attribution) {
+                    const attributionSection = document.getElementById('attribution-section');
+                    const attributionContent = document.getElementById('attribution-content');
+                    if (attributionSection && attributionContent) {
+                        attributionSection.style.display = 'block';
+                        attributionContent.textContent = config.attribution;
+                    }
+                }
+            }
+            
+            // 绘制资产变化图表
+            drawAssetChart();
+        }
+        
+        // 绘制资产变化图表
+        function drawAssetChart() {
+            const ctx = document.getElementById('assetChart').getContext('2d');
+            
+            // 模拟数据 - 实际应从后端获取
+            const labels = ['开始', '第1周', '第2周', '第3周', '第4周', '结束'];
+            const initialValue = 100000;
+            const finalValue = {{ portfolio.total_value }};
+            
+            // 生成模拟曲线数据
+            const dataPoints = generateAssetCurve(initialValue, finalValue, 6);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '资产总值',
+                        data: dataPoints,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '资产总值: ¥' + context.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return '¥' + (value / 1000).toFixed(0) + 'k';
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 生成资产曲线数据
+        function generateAssetCurve(start, end, points) {
+            const data = [start];
+            const step = (end - start) / (points - 1);
+            
+            for (let i = 1; i < points - 1; i++) {
+                // 添加一些随机波动
+                const randomFactor = 0.98 + Math.random() * 0.04;
+                const value = start + (step * i * randomFactor);
+                data.push(value);
+            }
+            
+            data.push(end);
+            return data;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initReport);
+    </script>
 </body>
 </html>

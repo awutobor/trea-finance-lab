@@ -7,12 +7,83 @@ from flask import Flask, render_template, request, jsonify, session
 from simulator import TradingSimulator
 from data_fetcher import DataFetcher
 import os
+from datetime import datetime, timedelta
+import random
 
 app = Flask(__name__)
 app.secret_key = 'trea-finance-lab-secret-key'
 
 # 初始化组件
 fetcher = DataFetcher(cache_duration=60)
+
+# 生成贵州茅台2012-2014年模拟股价数据
+def generate_maotai_stock_data():
+    """生成贵州茅台2012-2014年模拟股价数据"""
+    data = {
+        'dates': [],
+        'prices': [],
+        'events': []
+    }
+    
+    # 2012年初：起始价格200元
+    start_date = datetime(2012, 1, 1)
+    current_price = 200.0
+    
+    # 生成2012年1月-2013年6月的下跌趋势（腰斩）
+    for i in range(540):  # 约18个月
+        date = start_date + timedelta(days=i)
+        data['dates'].append(date.strftime('%Y-%m-%d'))
+        
+        # 模拟缓慢下跌，平均每天下跌约0.1元
+        current_price -= 0.1
+        if current_price < 95:
+            current_price = 95  # 最低跌至95元左右
+        data['prices'].append(round(current_price, 2))
+        
+        # 添加关键事件
+        if i == 180:  # 2012年中
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '新闻报道：高端白酒消费受限'
+            })
+        if i == 360:  # 2013年初
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '券商下调茅台盈利预测'
+            })
+        if i == 500:  # 2013年末
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'crash',
+                'content': '单日大跌8%，市场出现"茅台神话终结"的恐慌言论',
+                'question': '股价已从高点跌去超过50%，新闻一片悲观。作为股东，你现在应该：A) 跟随恐慌卖出；B) 持有不动，相信品牌；C) 趁机买入更多？'
+            })
+    
+    # 生成2014年震荡筑底阶段
+    for i in range(540, 720):  # 约6个月
+        date = start_date + timedelta(days=i)
+        data['dates'].append(date.strftime('%Y-%m-%d'))
+        
+        # 模拟100元左右震荡
+        current_price = 95 + random.uniform(-2, 3)
+        data['prices'].append(round(current_price, 2))
+        
+        if i == 600:  # 2014年中
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '财报显示，茅台净利润依然稳健'
+            })
+        if i == 660:  # 2014年末
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '民间消费开始承接政务需求'
+            })
+    
+    return data
 
 # 自由交易区模拟器
 trade_simulator = TradingSimulator(initial_balance=100000, portfolio_file='portfolio.json')
@@ -24,7 +95,7 @@ def get_experiment_simulator(experiment_id):
     """获取指定实验的模拟器实例"""
     if experiment_id not in experiment_simulators:
         experiment_simulators[experiment_id] = TradingSimulator(
-            initial_balance=100000, 
+            initial_balance=248500, 
             portfolio_file=f'experiment_{experiment_id}.json'
         )
     return experiment_simulators[experiment_id]
@@ -33,27 +104,27 @@ def get_experiment_simulator(experiment_id):
 experiments = [
     {
         'id': '1',
-        'title': '新手入门：基础交易策略',
-        'description': '学习基本的股票交易操作，了解买卖流程和费用计算',
+        'title': '认识波动：股权思维植入',
+        'description': '理解股价波动是常态，建立"股权所有者"心态，避免被短期价格牵着走',
         'difficulty': '入门',
-        'duration': '30分钟',
+        'duration': '20分钟',
         'image': 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=financial%20trading%20basics%20education&image_size=square'
     },
     {
         'id': '2',
-        'title': '趋势交易：跟随市场走势',
-        'description': '学习识别市场趋势，掌握趋势交易策略',
+        'title': '定投实验：可视化对比与心理提示',
+        'description': '体验定投策略如何平滑成本、降低择时压力，对比一次性买入的心理差异',
         'difficulty': '中级',
-        'duration': '45分钟',
+        'duration': '30分钟',
         'image': 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=stock%20market%20trend%20analysis&image_size=square'
     },
     {
         'id': '3',
-        'title': '价值投资：寻找低估股票',
-        'description': '学习基本面分析，识别具有投资价值的股票',
+        'title': '抗跌组合：构建逻辑与归因',
+        'description': '学习构建分散配置的组合，理解不同行业配置如何降低整体风险',
         'difficulty': '高级',
-        'duration': '60分钟',
-        'image': 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=value%20investing%20analysis&image_size=square'
+        'duration': '40分钟',
+        'image': 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=diversified%20investment%20portfolio%20risk%20management&image_size=square'
     }
 ]
 
@@ -402,5 +473,256 @@ def reset_experiment_account(experiment_id):
         'message': '实验账户已重置'
     })
 
+@app.route('/api/experiment/1/maotai-data')
+def get_maotai_stock_data():
+    """获取贵州茅台模拟股价数据API"""
+    data = generate_maotai_stock_data()
+    return jsonify({
+        'success': True,
+        'data': data
+    })
+
+# 生成沪深300指数2015-2019年模拟数据
+def generate_hs300_stock_data():
+    """生成沪深300指数2015-2019年模拟数据"""
+    data = {
+        'dates': [],
+        'prices': [],
+        'events': []
+    }
+    
+    # 2015年6月：起始价格5000点（牛市顶点）
+    start_date = datetime(2015, 6, 1)
+    current_price = 5000.0
+    
+    # 生成2015年6月-2016年的暴跌和阴跌趋势
+    for i in range(365):  # 约1年
+        date = start_date + timedelta(days=i)
+        data['dates'].append(date.strftime('%Y-%m-%d'))
+        
+        # 模拟暴跌和阴跌
+        if i < 60:  # 前2个月暴跌
+            current_price -= 30  # 快速下跌
+        elif i < 180:  # 中间4个月阴跌
+            current_price -= 5  # 缓慢下跌
+        else:  # 后6个月震荡
+            current_price += random.uniform(-10, 10)
+        
+        if current_price < 3000:
+            current_price = 3000  # 最低3000点
+        data['prices'].append(round(current_price, 2))
+        
+        # 添加关键事件
+        if i == 30:  # 2015年7月
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'crash',
+                'content': '股灾开始，指数暴跌'
+            })
+        if i == 180:  # 2016年初
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '指数进入漫长震荡期'
+            })
+    
+    # 生成2017-2018年的震荡期
+    for i in range(365, 1095):  # 约2年
+        date = start_date + timedelta(days=i)
+        data['dates'].append(date.strftime('%Y-%m-%d'))
+        
+        # 模拟震荡
+        current_price += random.uniform(-20, 20)
+        if current_price < 3000:
+            current_price = 3000
+        if current_price > 4000:
+            current_price = 4000
+        data['prices'].append(round(current_price, 2))
+        
+        if i == 730:  # 2017年6月
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '市场持续震荡，定投成本持续摊薄'
+            })
+        if i == 1000:  # 2018年贸易摩擦
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '贸易摩擦加剧，指数再次探底'
+            })
+    
+    # 生成2019年初的回升期
+    for i in range(1095, 1278):  # 约6个月
+        date = start_date + timedelta(days=i)
+        data['dates'].append(date.strftime('%Y-%m-%d'))
+        
+        # 模拟回升
+        current_price += 5  # 稳步回升
+        if current_price > 3500:
+            current_price = 3500  # 最终3500点
+        data['prices'].append(round(current_price, 2))
+        
+        if i == 1200:  # 2019年初
+            data['events'].append({
+                'date': date.strftime('%Y-%m-%d'),
+                'type': 'news',
+                'content': '指数开始回升，定投账户实现盈利'
+            })
+    
+    return data
+
+@app.route('/api/experiment/2/hs300-data')
+def get_hs300_stock_data():
+    """获取沪深300模拟指数数据API"""
+    data = generate_hs300_stock_data()
+    return jsonify({
+        'success': True,
+        'data': data
+    })
+
+# 生成实验三的行业分化模拟数据
+def generate_industry_stocks_data():
+    """生成行业分化模拟数据"""
+    # 股票池
+    stocks = [
+        {
+            'symbol': '600519',
+            'name': '贵州茅台',
+            'industry': '消费',
+            'type': '高估值成长',
+            'start_price': 2000.0,
+            'price_change': []
+        },
+        {
+            'symbol': '603288',
+            'name': '海天味业',
+            'industry': '消费',
+            'type': '高估值成长',
+            'start_price': 100.0,
+            'price_change': []
+        },
+        {
+            'symbol': '600276',
+            'name': '恒瑞医药',
+            'industry': '医药',
+            'type': '高估值成长',
+            'start_price': 80.0,
+            'price_change': []
+        },
+        {
+            'symbol': '300750',
+            'name': '宁德时代',
+            'industry': '新能源',
+            'type': '高景气成长',
+            'start_price': 300.0,
+            'price_change': []
+        },
+        {
+            'symbol': '600036',
+            'name': '招商银行',
+            'industry': '金融',
+            'type': '低估值价值',
+            'start_price': 40.0,
+            'price_change': []
+        },
+        {
+            'symbol': '601088',
+            'name': '中国神华',
+            'industry': '传统能源',
+            'type': '周期价值',
+            'start_price': 20.0,
+            'price_change': []
+        }
+    ]
+    
+    # 生成2021年全年的数据（365天）
+    start_date = datetime(2021, 1, 1)
+    dates = []
+    for i in range(365):
+        date = start_date + timedelta(days=i)
+        dates.append(date.strftime('%Y-%m-%d'))
+    
+    # 为每只股票生成价格变化
+    for stock in stocks:
+        current_price = stock['start_price']
+        prices = []
+        
+        for i in range(365):
+            # 根据行业和时间阶段生成不同的价格变化
+            if i < 60:  # 2021年初，核心资产上涨
+                if stock['type'] == '高估值成长':
+                    current_price *= (1 + random.uniform(0.001, 0.003))
+                elif stock['type'] == '高景气成长':
+                    current_price *= (1 + random.uniform(0.002, 0.004))
+                else:
+                    current_price *= (1 + random.uniform(0.0005, 0.0015))
+            elif i < 180:  # 2021年中，核心资产回调
+                if stock['type'] == '高估值成长':
+                    current_price *= (1 + random.uniform(-0.003, -0.001))
+                elif stock['type'] == '高景气成长':
+                    current_price *= (1 + random.uniform(0.002, 0.005))
+                elif stock['industry'] == '传统能源':
+                    current_price *= (1 + random.uniform(0.001, 0.003))
+                else:
+                    current_price *= (1 + random.uniform(-0.0005, 0.0005))
+            else:  # 2021年末，风格分化加剧
+                if stock['type'] == '高估值成长':
+                    current_price *= (1 + random.uniform(-0.001, 0.001))
+                elif stock['type'] == '高景气成长':
+                    current_price *= (1 + random.uniform(0.003, 0.006))
+                elif stock['industry'] == '传统能源':
+                    current_price *= (1 + random.uniform(0.002, 0.004))
+                else:
+                    current_price *= (1 + random.uniform(0.0005, 0.0015))
+            
+            prices.append(round(current_price, 2))
+        
+        stock['prices'] = prices
+    
+    # 生成事件
+    events = [
+        {
+            'date': '2021-02-01',
+            'type': 'news',
+            'content': '核心资产抱团达到顶峰'
+        },
+        {
+            'date': '2021-03-01',
+            'type': 'crash',
+            'content': '核心资产开始回调'
+        },
+        {
+            'date': '2021-06-01',
+            'type': 'news',
+            'content': '新能源行业景气度高涨'
+        },
+        {
+            'date': '2021-09-01',
+            'type': 'news',
+            'content': '传统能源价格上涨'
+        },
+        {
+            'date': '2021-12-31',
+            'type': 'news',
+            'content': '风格分化明显，新能源和传统能源表现强势'
+        }
+    ]
+    
+    return {
+        'dates': dates,
+        'stocks': stocks,
+        'events': events
+    }
+
+@app.route('/api/experiment/3/industry-data')
+def get_industry_stocks_data():
+    """获取行业分化模拟数据API"""
+    data = generate_industry_stocks_data()
+    return jsonify({
+        'success': True,
+        'data': data
+    })
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5004)
+    app.run(debug=True, host='0.0.0.0', port=8000)

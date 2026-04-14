@@ -42,7 +42,8 @@ class DataFetcher:
             'AMD': 158.90,
             'PYPL': 62.45,
             'BA': 178.90,
-            'IBM': 195.30
+            'IBM': 195.30,
+            '600519': 200.00  # 贵州茅台：基准价格
         }
         
         # 股票基本信息数据库
@@ -66,7 +67,8 @@ class DataFetcher:
             'AMD': {'name': 'AMD公司', 'sector': '半导体', 'exchange': 'NASDAQ'},
             'PYPL': {'name': 'PayPal公司', 'sector': '金融科技', 'exchange': 'NASDAQ'},
             'BA': {'name': '波音公司', 'sector': '航空', 'exchange': 'NYSE'},
-            'IBM': {'name': 'IBM公司', 'sector': '科技', 'exchange': 'NYSE'}
+            'IBM': {'name': 'IBM公司', 'sector': '科技', 'exchange': 'NYSE'},
+            '600519': {'name': '贵州茅台', 'sector': '食品饮料', 'exchange': 'SSE'}
         }
     
     def get_price(self, symbol):
@@ -81,6 +83,14 @@ class DataFetcher:
         if self._is_cache_valid(symbol):
             print(f"[缓存] {symbol}: ${self.cache[symbol]:.2f}")
             return self.cache[symbol]
+        
+        # 贵州茅台特殊处理：模拟2012-2014年股价走势
+        if self.use_mock_data and symbol == '600519':
+            price = self._get_maotai_price()
+            self.cache[symbol] = price
+            self.last_fetch_time[symbol] = time.time()
+            print(f"[模拟数据-茅台] 600519: ¥{price:.2f}")
+            return price
         
         # 如果启用了模拟数据模式，优先使用模拟数据
         if self.use_mock_data and symbol in self.mock_prices:
@@ -144,6 +154,18 @@ class DataFetcher:
             self.last_fetch_time[symbol] = time.time()
             print(f"[随机模拟] {symbol}: ${price:.2f}")
             return price
+    
+    def _get_maotai_price(self):
+        """
+        获取贵州茅台的模拟价格（基于2012-2014年历史数据）
+        """
+        # 模拟2012-2014年茅台股价走势
+        # 2012年初：248.50元（实验初始价格）
+        base_price = 248.50  # 实验初始价格
+        # 添加随机波动
+        fluctuation = random.uniform(-1, 1)
+        price = base_price + fluctuation
+        return round(price, 2)
     
     def get_stock_info(self, symbol):
         """
